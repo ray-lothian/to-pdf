@@ -1,0 +1,17 @@
+[data-cmd=save-as-pdf-jspdf],
+[data-cmd=save-as-pdf-print] {
+  cursor: pointer;
+}
+[data-cmd=save-as-pdf-jspdf][data-working=true],
+[data-cmd=save-as-pdf-print][data-working=true] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+[data-cmd=save-as-pdf-jspdf] img,
+[data-cmd=save-as-pdf-print] img {
+  height: 14px;
+  margin-top: -3px;
+  padding: 0 5px;
+  pointer-events: none;
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Gmail to PDF (local)",
+  "description": "convert Gmail to PDF locally without a server interaction to keep your emails secure and private",
+  "author": "Jeremy Schomery",
+  "version": "0.1.0",
+  "manifest_version": 2,
+  "permissions": [
+    "storage",
+    "tabs",
+    "<all_urls>",
+    "downloads"
+  ],
+  "background": {
+    "scripts": [
+      "common.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://mail.google.com/*"],
+      "run_at": "document_start",
+      "css": ["/data/button/index.css"],
+      "js": ["/data/button/index.js"]
+    },
+    {
+      "matches": ["*://mail.google.com/mail/u/*/*&view=pt&*"],
+      "run_at": "document_start",
+      "js": ["/data/view/index.js"],
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    "data/button/icon-blue.svg",
+    "data/button/icon-orange.svg",
+    "data/print/index.html"
+  ]
+}
