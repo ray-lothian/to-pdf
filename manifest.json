@@ -1,7 +1,7 @@
 {
-  "name": "Gmail to PDF (local)",
-  "description": "convert Gmail to PDF locally without a server interaction to keep your emails secure and private",
-  "author": "Jeremy Schomery",
+  "name": "Convert Gmail™ to PDF (locally)",
+  "description": "Convert your emails to PDF format locally (without a server interaction; secure and private) to backup your emails",
+  "author": "Ray Lothian",
   "version": "0.1.0",
   "manifest_version": 2,
   "permissions": [
@@ -25,7 +25,10 @@
     {
       "matches": ["*://mail.google.com/mail/u/*/*&view=pt&*"],
       "run_at": "document_start",
-      "js": ["/data/view/index.js"],
+      "js": [
+        "/prefs.js",
+        "/data/view/index.js"
+      ],
       "all_frames": true
     }
   ],
@@ -33,5 +36,18 @@
     "data/button/icon-blue.svg",
     "data/button/icon-orange.svg",
     "data/print/index.html"
-  ]
+  ],
+  "homepage_url": "http://add0n.com/to-pdf.html?from=gmail",
+  "options_ui": {
+    "page": "/data/options/index.html",
+    "chrome_style": true
+  },
+  "icons": {
+     "16": "/data/icons/16.png",
+     "32": "/data/icons/32.png",
+     "48": "/data/icons/48.png",
+     "64": "/data/icons/64.png",
+     "128": "/data/icons/128.png",
+     "256": "/data/icons/256.png"
+  }
 }

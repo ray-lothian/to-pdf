@@ -1,3 +1,4 @@
+/* globals config */
 'use strict';
 
 const search = document.location.search.substr(1)
@@ -29,6 +30,15 @@ if (window.top !== window) {
     `
   });
   document.documentElement.appendChild(script);
+  if (search.cm === 'save-as-pdf-jspdf') {
+    chrome.storage.local.get({
+      css: config.css
+    }, prefs => {
+      document.documentElement.appendChild(Object.assign(document.createElement('style'), {
+        textContent: prefs.css
+      }));
+    });
+  }
 
   window.addEventListener('message', e => {
     if (e.data === 'convert-to-pdf') {

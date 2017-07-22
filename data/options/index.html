@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Test Extension Options</title>
+  <style>
+    body {
+      padding: 10px;
+      font-family: "Helvetica Neue",Helvetica,sans-serif;
+      font-size: 13px;
+    }
+    textarea {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  PDF size (simple mode):
+  <table>
+    <tr>
+      <td>
+        <label><input type="radio" name="type" value="standard"> Standard size:</label>
+      </td>
+      <td>
+        <select>
+          <option data-width="2383.94" data-height="3370.39" value="a0">A0</option>
+          <option data-width="1683.78" data-height="2383.94" value="a1">A1</option>
+          <option data-width="1190.55" data-height="1683.78" value="a2">A2</option>
+          <option data-width="841.89" data-height="1190.55" value="a3">A3</option>
+          <option data-width="595.28" data-height="841.89" value="a4">A4</option>
+          <option data-width="419.53" data-height="595.28" value="a5">A5</option>
+          <option data-width="297.64" data-height="419.53" value="a6">A6</option>
+          <option data-width="209.76" data-height="297.64" value="a7">A7</option>
+          <option data-width="147.4" data-height="209.76" value="a8">A8</option>
+          <option data-width="104.88" data-height="147.4" value="a9">A9</option>
+          <option data-width="73.7" data-height="104.88" value="a10">A10</option>
+          <option data-width="2834.65" data-height="4008.19" value="b0">B0</option>
+          <option data-width="2004.09" data-height="2834.65" value="b1">B1</option>
+          <option data-width="1417.32" data-height="2004.09" value="b2">B2</option>
+          <option data-width="1000.63" data-height="1417.32" value="b3">B3</option>
+          <option data-width="708.66" data-height="1000.63" value="b4">B4</option>
+          <option data-width="498.9" data-height="708.66" value="b5">B5</option>
+          <option data-width="354.33" data-height="498.9" value="b6">B6</option>
+          <option data-width="249.45" data-height="354.33" value="b7">B7</option>
+          <option data-width="175.75" data-height="249.45" value="b8">B8</option>
+          <option data-width="124.72" data-height="175.75" value="b9">B9</option>
+          <option data-width="87.87" data-height="124.72" value="b10">B10</option>
+          <option data-width="2599.37" data-height="3676.54" value="c0">C0</option>
+          <option data-width="1836.85" data-height="2599.37" value="c1">C1</option>
+          <option data-width="1298.27" data-height="1836.85" value="c2">C2</option>
+          <option data-width="918.43" data-height="1298.27" value="c3">C3</option>
+          <option data-width="649.13" data-height="918.43" value="c4">C4</option>
+          <option data-width="459.21" data-height="649.13" value="c5">C5</option>
+          <option data-width="323.15" data-height="459.21" value="c6">C6</option>
+          <option data-width="229.61" data-height="323.15" value="c7">C7</option>
+          <option data-width="161.57" data-height="229.61" value="c8">C8</option>
+          <option data-width="113.39" data-height="161.57" value="c9">C9</option>
+          <option data-width="79.37" data-height="113.39" value="c10">C10</option>
+          <option data-width="311.81" data-height="623.62" value="dl">Dl</option>
+          <option data-width="612" data-height="792" value="letter" selected="true">Letter</option>
+          <option data-width="576" data-height="756" value="government-letter">Government Letter</option>
+          <option data-width="612" data-height="1008" value="legal">Legal</option>
+          <option data-width="576" data-height="360" value="junior-legal">Junior Legal</option>
+          <option data-width="1224" data-height="792" value="ledger">Ledger</option>
+          <option data-width="792" data-height="1224" value="tabloid">Tabloid</option>
+          <option data-width="153" data-height="243" value="credit-card">Credit Card</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label><input type="radio" name="type" value="page"> Page size</label>
+      </td>
+      <td>page width X height</td>
+    </tr>
+  </table>
+  <p>
+    <label><input type="checkbox" id="images"> Include images in the output document (simple mode)</label>
+  </p>
+  <p>
+    Custom CSS style (simple mode):
+    <textarea id="css" rows="6"></textarea>
+  </p>
+
+  <div>
+    <button id="save">Save</button>
+    <span id="status"></span>
+  </div>
+
+  <script src="/prefs.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>

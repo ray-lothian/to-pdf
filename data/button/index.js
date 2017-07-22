@@ -32,7 +32,7 @@ function insert() {
         window.iframe = Object.assign(document.createElement('iframe'), {
           width: 300,
           height: 300,
-          style: 'position: absolute; left: 0; top: 0; display: none;',
+          style: 'position: absolute; left: 0; top: 0; background-color: #fff; display: none;',
           src: '//mail.google.com/mail/u/0/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd
         });
         document.body.appendChild(window.iframe);

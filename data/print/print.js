@@ -1,4 +1,4 @@
-/* globals jsPDF, search */
+/* globals jsPDF, search, config */
 'use strict';
 
 var Node = function(node) {
@@ -95,26 +95,28 @@ Node.prototype.isMultiLine = function() {
 };
 
 var PDF = function({
-  orientation = 'landscape',
   root = document.body,
-  width = root.clientWidth,
-  height = root.clientHeight,
+  width = 612,
+  height = 792,
   padding = 50
 } = {}) {
   this.doc = new jsPDF({
-    orientation: orientation,
+    orientation: width > height ? 'portrait' : 'landscape',
     unit: 'pt',
-    format: [width, height].map(String)
+    format: [width, height].map(String),
   });
   this.root = root;
   this.height = height - padding;
-  this.width = width;
+  // adjusting HTML document size
+  root.style.width = width + 'px';
+  root.style['box-sizing'] = 'border-box';
+  root.style.margin = '0';
+  root.style.padding = padding + 'px';
   // generate pages
   const pages = Math.ceil(root.clientHeight / height);
   for (let i = 1; i < pages; i += 1) {
     this.doc.addPage();
   }
-  //
   //console.log(this.doc.getFontList())
 };
 
@@ -224,7 +226,7 @@ PDF.prototype.font = function(styles) {
 PDF.prototype.addNode = function(node) {
   this.font(node.styles);
   return this.split(node).forEach(({rect, value}) => {
-    const div = document.createElement('div');
+    /*const div = document.createElement('div');
     div.style = `
       position: absolute;
       top: ${rect.top}px;
@@ -233,7 +235,7 @@ PDF.prototype.addNode = function(node) {
       height: ${rect.height}px;
       border: solid 1px blue;
     `;
-    document.body.appendChild(div);
+    document.body.appendChild(div);*/
 
     const {left, top, height} = this.adjustPage(rect);
     // make sure text is fitting inside the rect
@@ -310,32 +312,30 @@ PDF.prototype.adjustPage = function(rect) {
 };
 
 chrome.storage.local.get({
-  width: 595.28 / 0.75,
-  height: 841.89 / 0.75,
+  width: 612,
+  height: 792,
+  size: config.size,
   padding: 10,
-  orientation: 'landscape'
+  images: config.images,
+  borders: config.borders
 }, prefs => {
-  document.body.style.width = prefs.width + 'px';
-  document.body.style['box-sizing'] = 'border-box';
-  document.body.style.margin = '0';
-  document.body.style['background-color'] = '#fff';
-  document.body.style.padding = prefs.padding + 'px';
-
   const pdf = new PDF({
-    width: prefs.width,
-    height: prefs.height
+    width: prefs.size === 'page' ? window.top.document.body.clientWidth : (prefs.width / 0.67),
+    height: prefs.size === 'page' ? window.top.document.body.clientHeight : (prefs.height / 0.67)
   });
-
   const {nodes, lines, images} = pdf.collect();
-  lines().then(nodes => nodes.forEach(node => pdf.addLines(node)))
+  nodes().then(nodes => nodes.forEach(node => pdf.addNode(node)))
   .then(() => {
-    return nodes().then(nodes => nodes.forEach(node => pdf.addNode(node)));
+    if (prefs.lines) {
+      return lines().then(nodes => nodes.forEach(node => pdf.addLines(node)));
+    }
   })
   .then(() => {
-    return images().then(nodes => nodes.forEach(img => pdf.addImage(img))).then(() => console.log('images are done'));
+    if (prefs.images) {
+      return images().then(nodes => nodes.forEach(img => pdf.addImage(img)));
+    }
   })
   .then(() => {
-    console.log('saving');
     chrome.runtime.sendMessage({
       method: 'download',
       url: pdf.doc.output('datauristring'),
