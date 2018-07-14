@@ -1,43 +1,67 @@
 'use strict';
 
+function onClicked(e) {
+  const span = e.target;
+  const cmd = span.dataset.cmd;
+  if (cmd && cmd.startsWith('save-as-pdf-')) {
+    span.dataset.working = true;
+    if (window.iframe) {
+      window.iframe.remove();
+    }
+    let [search, th, additional] = document.location.hash.substr(1).split('/');
+    // try to find the thread id in the new UI
+    const root = e.target.closest('.bkK');
+    if (root) {
+      const legacy = root.querySelector('[data-legacy-thread-id].hP');
+      console.log(legacy, root);
+      if (legacy) {
+        th = legacy.dataset.legacyThreadId || th;
+      }
+    }
+    if (additional) {
+      search = 'all';
+    }
+    console.log(th, search);
+
+    window.iframe = Object.assign(document.createElement('iframe'), {
+      width: 300,
+      height: 300,
+      style: 'position: absolute; left: 0; top: 0; background-color: #fff; visibility: hidden; pointer-events: none;',
+      src: '//mail.google.com/mail/u/0/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd
+    });
+    document.body.appendChild(window.iframe);
+  }
+}
+
 function insert() {
+  try {
+    document.getElementById('jspdf-print').remove();
+    document.getElementById('jspdf-pdf').remove();
+  }
+  catch (e) {}
+
   const parent = document.querySelector('.ade');
   if (parent) {
     const img = Object.assign(document.createElement('img'), {
       src: chrome.runtime.getURL('/data/button/icon-blue.svg')
     });
     const print = Object.assign(document.createElement('span'), {
-      title: 'Save as PDF (print)'
+      title: 'Save as PDF (print)',
+      id: 'jspdf-print'
     });
     print.classList.add('hk', 'J-J5-Ji');
     print.appendChild(img);
     print.dataset.cmd = 'save-as-pdf-print';
+    print.addEventListener('click', onClicked);
     parent.insertBefore(print, parent.firstChild);
     const pdf = Object.assign(print.cloneNode(true), {
-      title: 'Save as PDF (simple)'
+      title: 'Save as PDF (simple)',
+      id: 'jspdf-pdf'
     });
     pdf.dataset.cmd = 'save-as-pdf-jspdf';
     pdf.querySelector('img').src = chrome.runtime.getURL('/data/button/icon-orange.svg');
+    pdf.addEventListener('click', onClicked);
     parent.insertBefore(pdf, parent.firstChild);
-
-    parent.addEventListener('click', e => {
-      const span = e.target;
-      const cmd = span.dataset.cmd;
-      if (cmd && cmd.startsWith('save-as-pdf-')) {
-        span.dataset.working = true;
-        if (window.iframe) {
-          window.iframe.remove();
-        }
-        const [search, th] = document.location.hash.substr(1).split('/');
-        window.iframe = Object.assign(document.createElement('iframe'), {
-          width: 300,
-          height: 300,
-          style: 'position: absolute; left: 0; top: 0; background-color: #fff; visibility: hidden; pointer-events: none;',
-          src: '//mail.google.com/mail/u/0/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd
-        });
-        document.body.appendChild(window.iframe);
-      }
-    });
   }
 }
 
@@ -45,13 +69,19 @@ window.addEventListener('hashchange', insert);
 
 if (window.location.hash.split('/').length > 1) {
   window.addEventListener('load', () => {
-    const observer = new MutationObserver(() => {
-      if (document.querySelector('.ade')) {
-        observer.disconnect();
-        insert();
-      }
-    });
-    observer.observe(document.body, {childList: true});
+    if (document.querySelector('.ade')) {
+      insert();
+    }
+    else {
+      const observer = new MutationObserver(() => {
+        if (document.querySelector('.ade')) {
+          observer.disconnect();
+          insert();
+        }
+      });
+
+      observer.observe(document.body, {childList: true});
+    }
   });
 }
 
