@@ -117,7 +117,7 @@ var PDF = function({
   for (let i = 1; i < pages; i += 1) {
     this.doc.addPage();
   }
-  //console.log(this.doc.getFontList())
+  // console.log(this.doc.getFontList())
 };
 
 PDF.prototype.collect = function() {
@@ -226,7 +226,7 @@ PDF.prototype.font = function(styles) {
 PDF.prototype.addNode = function(node) {
   this.font(node.styles);
   return this.split(node).forEach(({rect, value}) => {
-    /*const div = document.createElement('div');
+    /* const div = document.createElement('div');
     div.style = `
       position: absolute;
       top: ${rect.top}px;
@@ -235,11 +235,11 @@ PDF.prototype.addNode = function(node) {
       height: ${rect.height}px;
       border: solid 1px blue;
     `;
-    document.body.appendChild(div);*/
+    document.body.appendChild(div); */
 
     const {left, top, height} = this.adjustPage(rect);
     // make sure text is fitting inside the rect
-    /*let loop = true;
+    /* let loop = true;
     while (loop) {
       let fontSize = this.doc.internal.getFontSize();
       const w = this.doc.getStringUnitWidth(value) * fontSize;
@@ -251,7 +251,7 @@ PDF.prototype.addNode = function(node) {
       else {
         loop = false;
       }
-    }*/
+    } */
     const lineHeight = this.doc.getLineHeight();
     this.doc.text(value, left, top + lineHeight / 3 + height / 2);
   });
@@ -262,7 +262,7 @@ PDF.prototype.addLines = function(node) {
     return;
   }
   const {top, left, width, height} = this.adjustPage(node.rect);
-  //const {top, left, width, height} = node.rect;
+  // const {top, left, width, height} = node.rect;
 
   let thickness = node.styles['border-top-width'];
   if (thickness) {

@@ -1,0 +1,1 @@
+https://github.com/MrRio/jsPDF/blob/9ebe3d9b808f799b8b194e0efeb066aa5a719c87/dist/jspdf.min.js

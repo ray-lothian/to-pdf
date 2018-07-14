@@ -1,8 +1,8 @@
 {
-  "name": "Convert Gmail™ to PDF (locally)",
+  "name": "Gmail to PDF",
   "description": "Convert your emails to PDF format locally (without a server interaction; secure and private) to backup your emails",
   "author": "Ray Lothian",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "manifest_version": 2,
   "permissions": [
     "storage",
@@ -49,5 +49,10 @@
      "64": "/data/icons/64.png",
      "128": "/data/icons/128.png",
      "256": "/data/icons/256.png"
+  },
+  "applications": {
+    "gecko": {
+      "id": "{371c3edd-c535-46a6-b2eb-a7fba7090766}"
+    }
   }
 }

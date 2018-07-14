@@ -56,7 +56,7 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
               allFrames: false,
               code: `
                 try {
-                  document.body.removeChild(window.iframe);
+                  window.iframe.remove();
                 }
                 catch (e) {}
                 delete window.iframe;
