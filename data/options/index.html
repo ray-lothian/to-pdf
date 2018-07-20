@@ -7,16 +7,69 @@
       padding: 10px;
       font-family: "Helvetica Neue",Helvetica,sans-serif;
       font-size: 13px;
+      min-width: 500px;
     }
     textarea {
       width: 100%;
+    }
+    h2 {
+      font-weight: 200;
+    }
+    .note {
+      color: #969595;
+      padding-bottom: 5px;
+      font-size: 90%;
     }
   </style>
 </head>
 
 <body>
-  PDF size (simple mode):
-  <table>
+  <table width=100%>
+    <colgroup>
+      <col width=32>
+      <col>
+    </colgroup>
+    <tr>
+      <td colspan="2"><h2>Integrate:</h2></td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="simple-mode"></td>
+      <td><label for="simple-mode">Simple-mode button (Orange button)</label></td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="print-mode"></td>
+      <td><label for="print-mode">Print-mode button (Blue button)</label></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <h2>Filename:</h2>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <label style="display: flex; align-items: center;">Filename format:&nbsp;<input style="flex: 1" type="text" id="format" placeholder="[title] - [date]"></label>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td class="note">Available keywords: [title], [simple-title], [date], [gmt], and [time]</td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="saveAs"></td>
+      <td><label for="saveAs">Display the save dialog</label></td>
+    </tr>
+    <tr>
+      <td colspan="2"><h2>PDF size (simple mode):</h2></td>
+    </tr>
+  </table>
+
+
+  <table width=100%>
+    <colgroup>
+      <col width=150>
+      <col>
+    </colgroup>
     <tr>
       <td>
         <label><input type="radio" name="type" value="standard"> Standard size:</label>
@@ -71,14 +124,14 @@
       <td>
         <label><input type="radio" name="type" value="page"> Page size</label>
       </td>
-      <td>page width X height</td>
+      <td>Actual page's width &times; height</td>
     </tr>
   </table>
   <p>
     <label><input type="checkbox" id="images"> Include images in the output document (simple mode)</label>
   </p>
   <p>
-    Custom CSS style (simple mode):
+    <h2>Custom CSS style (simple mode):</h2>
     <textarea id="css" rows="6"></textarea>
   </p>
 

@@ -2,6 +2,11 @@
 
 var config = {};
 
+config['simple-mode'] = true;
+config['print-mode'] = true;
+
+config.format = '[title] - [date] [time]';
+
 config.size = 'letter';
 
 config.images = false;

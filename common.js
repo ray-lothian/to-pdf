@@ -24,6 +24,7 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
     return true;
   }
   else if (request.method === 'convert-to-pdf') {
+
     chrome.tabs.executeScript(tabId, {
       runAt: 'document_start',
       allFrames: false,
@@ -39,33 +40,51 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
     });
   }
   else if (request.method === 'download') {
-    const filename = sender.tab.title
-      .replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>{}[\]\\/]/gi, '_') + '.pdf';
-    fetch(request.url)
-      .then(res => res.blob())
-      .then(blob => {
-        const url = URL.createObjectURL(blob);
-        chrome.downloads.download({
-          filename,
-          url
-        }, () => {
-          window.setTimeout(() => {
-            URL.revokeObjectURL(url);
-            chrome.tabs.executeScript(tabId, {
-              runAt: 'document_start',
-              allFrames: false,
-              code: `
-                try {
-                  window.iframe.remove();
-                }
-                catch (e) {}
-                delete window.iframe;
-                document.querySelector('[data-cmd=${request.cmd}]').dataset.working = false;
-              `
+    chrome.storage.local.get({
+      format: '[title] - [date] [time]',
+      saveAs: false
+    }, prefs => {
+      const time = new Date();
+      const gmt = (new Date(time - time.getTimezoneOffset() * 60000))
+        .toISOString().slice(2, 10).replace(/[^0-9]/g, '');
+
+      const filename = prefs.format
+        .replace('[title]', sender.tab.title)
+        .replace('[simple-title]', sender.tab.title.replace(/\s-\s[^\s]+@.*$/, ''))
+        .replace('[date]', time.toLocaleDateString().replace(/[:\/]/g, '.'))
+        .replace('[time]', time.toLocaleTimeString().replace(/[:\/]/g, '.'))
+        .replace('[gmt]', gmt)
+        .replace(/[`~!@#$%^&*()_|+=?;:'",<>{}[\]\\/]/gi, '_')
+        .replace('.pdf', '') + '.pdf';
+
+      fetch(request.url)
+        .then(res => res.blob())
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          chrome.downloads.download({
+            filename,
+            url,
+            saveAs: prefs.saveAs
+          }, () => {
+            window.setTimeout(() => {
+              URL.revokeObjectURL(url);
+              chrome.tabs.executeScript(tabId, {
+                runAt: 'document_start',
+                allFrames: false,
+                code: `
+                  try {
+                    window.iframe.remove();
+                  }
+                  catch (e) {}
+                  delete window.iframe;
+                  document.querySelector('[data-cmd=${request.cmd}]').dataset.working = false;
+                `
+              });
             });
           });
         });
-      });
+    });
+
     return false;
   }
 });

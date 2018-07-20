@@ -2,7 +2,7 @@
   "name": "Gmail to PDF",
   "description": "Convert your emails to PDF format locally (without a server interaction; secure and private) to backup your emails",
   "author": "Ray Lothian",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "manifest_version": 2,
   "permissions": [
     "storage",
@@ -35,7 +35,8 @@
   "web_accessible_resources": [
     "data/button/icon-blue.svg",
     "data/button/icon-orange.svg",
-    "data/print/index.html"
+    "data/print/index.html",
+    "data/assets/*.ttf"
   ],
   "homepage_url": "http://add0n.com/to-pdf.html?from=gmail",
   "options_ui": {

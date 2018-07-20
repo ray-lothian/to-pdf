@@ -103,10 +103,11 @@ var PDF = function({
   this.doc = new jsPDF({
     orientation: width > height ? 'portrait' : 'landscape',
     unit: 'pt',
-    format: [width, height].map(String),
+    format: [width, height].map(String)
   });
   this.root = root;
   this.height = height - padding;
+  this._fonts = [];
   // adjusting HTML document size
   root.style.width = width + 'px';
   root.style['box-sizing'] = 'border-box';
@@ -194,37 +195,70 @@ PDF.prototype.split = function(node) {
   }
 };
 
+PDF.prototype.toBase64 = function(blob) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(';base64,')[1]);
+    reader.readAsDataURL(blob);
+  });
+};
+
 PDF.prototype.addImage = function(node) {
   const rect = node.img.getBoundingClientRect();
   const {left, top, width, height} = this.adjustPage(rect);
   this.doc.addImage(node.data, 'PNG', left, top, width, height);
 };
 
-PDF.prototype.font = function(styles) {
+PDF.prototype.font = async function(styles) {
   // font size
-  // this.doc.addFont(styles['font-size'], styles['font-size']);
   this.doc.setFontSize(styles['font-size']);
-  // font family
-  this.doc.setFont(styles['font-family']);
+  let style = 'normal';
   // font style
   if (styles['font-style'] === 'italic' && styles['font-weight'] === 'bold') {
-    this.doc.setFontType('bolditalic');
+    style = 'bolditalic';
   }
   else if (styles['font-style'] === 'italic') {
-    this.doc.setFontType('italic');
+    style = 'italic';
   }
   else if (styles['font-weight'] === 'bold') {
-    this.doc.setFontType('bold');
+    style = 'bold';
   }
-  else {
-    this.doc.setFontType('normal');
+  this.doc.setFontType(style);
+
+  // font family
+  const family = styles['font-family'].toLowerCase();
+  let file = family;
+  if (style === 'bolditalic') {
+    file += 'bi';
   }
+  else if (style === 'bold') {
+    file += 'b';
+  }
+  else if (style === 'italic') {
+    file += 'i';
+  }
+  file += '.ttf';
+  if (this._fonts.indexOf(file) === -1) {
+    try {
+      const url = chrome.runtime.getURL('/data/assets/' + file);
+      const blob = await fetch(url).then(r => r.blob());
+      const b64 = await this.toBase64(blob);
+      this.doc.addFileToVFS(file, b64);
+      this.doc.addFont(file, family, style);
+    }
+    catch(e) {
+      console.log(family + ' is not supported', file);
+    }
+    this._fonts.push(file);
+  }
+  this.doc.setFont(family);
+
   // color
   this.doc.setTextColor(...styles.color);
 };
 
-PDF.prototype.addNode = function(node) {
-  this.font(node.styles);
+PDF.prototype.addNode = async function(node) {
+  await this.font(node.styles);
   return this.split(node).forEach(({rect, value}) => {
     /* const div = document.createElement('div');
     div.style = `
@@ -253,6 +287,7 @@ PDF.prototype.addNode = function(node) {
       }
     } */
     const lineHeight = this.doc.getLineHeight();
+    // console.log(value);
     this.doc.text(value, left, top + lineHeight / 3 + height / 2);
   });
 };
@@ -323,8 +358,13 @@ chrome.storage.local.get({
     width: prefs.size === 'page' ? window.top.document.body.clientWidth : (prefs.width / 0.67),
     height: prefs.size === 'page' ? window.top.document.body.clientHeight : (prefs.height / 0.67)
   });
+
   const {nodes, lines, images} = pdf.collect();
-  nodes().then(nodes => nodes.forEach(node => pdf.addNode(node)))
+  nodes().then(async nodes => {
+    for (const node of nodes) {
+      await pdf.addNode(node);
+    }
+  })
   .then(() => {
     if (prefs.lines) {
       return lines().then(nodes => nodes.forEach(node => pdf.addLines(node)));

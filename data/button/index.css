@@ -1,6 +1,7 @@
 [data-cmd=save-as-pdf-jspdf],
 [data-cmd=save-as-pdf-print] {
   cursor: pointer;
+  user-select: none;
 }
 [data-cmd=save-as-pdf-jspdf][data-working=true],
 [data-cmd=save-as-pdf-print][data-working=true] {
