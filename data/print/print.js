@@ -1,4 +1,4 @@
-/* globals jsPDF, search, config */
+/* globals jsPDF, search, config, storage */
 'use strict';
 
 var Node = function(node) {
@@ -210,23 +210,26 @@ PDF.prototype.addImage = function(node) {
 };
 
 PDF.prototype.font = async function(styles) {
+  //
   // font size
   this.doc.setFontSize(styles['font-size']);
   let style = 'normal';
   // font style
-  if (styles['font-style'] === 'italic' && styles['font-weight'] === 'bold') {
+  const bold = styles['font-weight'] === 'bold' || styles['font-weight'] === '700';
+  if (styles['font-style'] === 'italic' && bold) {
     style = 'bolditalic';
   }
   else if (styles['font-style'] === 'italic') {
     style = 'italic';
   }
-  else if (styles['font-weight'] === 'bold') {
+  else if (bold) {
     style = 'bold';
   }
   this.doc.setFontType(style);
 
   // font family
   const family = styles['font-family'].toLowerCase();
+
   let file = family;
   if (style === 'bolditalic') {
     file += 'bi';
@@ -238,6 +241,7 @@ PDF.prototype.font = async function(styles) {
     file += 'i';
   }
   file += '.ttf';
+
   if (this._fonts.indexOf(file) === -1) {
     try {
       const url = chrome.runtime.getURL('/data/assets/' + file);
@@ -346,14 +350,14 @@ PDF.prototype.adjustPage = function(rect) {
   };
 };
 
-chrome.storage.local.get({
+storage({
   width: 612,
   height: 792,
   size: config.size,
   padding: 10,
   images: config.images,
   borders: config.borders
-}, prefs => {
+}).then(prefs => {
   const pdf = new PDF({
     width: prefs.size === 'page' ? window.top.document.body.clientWidth : (prefs.width / 0.67),
     height: prefs.size === 'page' ? window.top.document.body.clientHeight : (prefs.height / 0.67)
@@ -379,7 +383,7 @@ chrome.storage.local.get({
     chrome.runtime.sendMessage({
       method: 'download',
       url: pdf.doc.output('datauristring'),
-      cmd: search.cm
+      cmd: search.get('cm')
     });
   });
 });

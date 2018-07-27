@@ -15,10 +15,22 @@
     h2 {
       font-weight: 200;
     }
+    a {
+      text-decoration: none;
+    }
+    .note,
+    .admin {
+      font-size: 90%;
+    }
     .note {
       color: #969595;
       padding-bottom: 5px;
-      font-size: 90%;
+    }
+    .admin {
+      background-color: #ffffed;
+      border: solid 1px #e8ec3a;
+      padding: 10px;
+      margin: 15px 0;
     }
   </style>
 </head>
@@ -60,7 +72,7 @@
       <td><label for="saveAs">Display the save dialog</label></td>
     </tr>
     <tr>
-      <td colspan="2"><h2>PDF size (simple mode):</h2></td>
+      <td colspan="2"><h2>PDF size (simple-mode):</h2></td>
     </tr>
   </table>
   <table width=100%>
@@ -141,18 +153,18 @@
     </tr>
     <tr>
       <td><input type="checkbox" id="images"></td>
-      <td><label for="images">Include images in the output document (simple mode)</label></td>
+      <td><label for="images">Include images in the output document (simple-mode)</label></td>
     </tr>
     <tr>
       <td><input type="checkbox" id="faqs"></td>
       <td><label for="faqs">Open FAQs page on updates</label></td>
     </tr>
   </table>
-  <p>
-    <h2>Custom CSS style (simple mode):</h2>
+  <div>
+    <h2>Custom CSS style (simple-mode):</h2>
     <textarea id="css" rows="6"></textarea>
-  </p>
-
+  </div>
+  <div class="admin">This extension supports managed storage. All the settings can be pre-configured by <a href="https://www.chromium.org/administrators/configuring-policy-for-extensions">the domain administrator</a></div>
   <div>
     <button id="reset">Reset</button>
     <button id="support">Support Development</button> - <button id="save">Save</button>

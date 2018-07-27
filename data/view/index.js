@@ -1,11 +1,11 @@
 /* globals config */
 'use strict';
 
-const search = document.location.search.substr(1)
-  .split('&').map(s => {
-    const [key, value] = s.split('=');
-    return [key, value];
-  }).reduce((p, c) => Object.assign(p, {[c[0]]: decodeURIComponent(c[1])}), {});
+var storage = prefs => new Promise(resolve => {
+  chrome.storage.managed.get(prefs, prefs => chrome.storage.local.get(prefs, resolve));
+});
+
+var search = new URLSearchParams(location.search);
 
 if (window.top !== window) {
   const script = Object.assign(document.createElement('script'), {
@@ -16,7 +16,7 @@ if (window.top !== window) {
           configurable: true,
           get() {
             return () => {
-              if (${search.cm === 'save-as-pdf-jspdf'}) {
+              if (${search.get('cm') === 'save-as-pdf-jspdf'}) {
                 window.postMessage('convert-to-pdf', '*');
               }
               else {
@@ -30,10 +30,10 @@ if (window.top !== window) {
     `
   });
   document.documentElement.appendChild(script);
-  if (search.cm === 'save-as-pdf-jspdf') {
-    chrome.storage.local.get({
+  if (search.get('cm') === 'save-as-pdf-jspdf') {
+    storage({
       css: config.css
-    }, prefs => {
+    }).then(prefs => {
       document.documentElement.appendChild(Object.assign(document.createElement('style'), {
         textContent: prefs.css
       }));

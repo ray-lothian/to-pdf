@@ -1,6 +1,10 @@
 'use strict';
 
-function onClicked(e) {
+var storage = prefs => new Promise(resolve => {
+  chrome.storage.managed.get(prefs, prefs => chrome.storage.local.get(prefs, resolve));
+});
+
+async function onClicked(e) {
   const span = e.target;
   const cmd = span.dataset.cmd;
   if (cmd && cmd.startsWith('save-as-pdf-')) {
@@ -20,71 +24,70 @@ function onClicked(e) {
     if (additional) {
       search = 'all';
     }
-    chrome.storage.local.get({
+    const {debug} = await storage({
       debug: false
-    }, ({debug}) => {
-      window.iframe = Object.assign(document.createElement('iframe'), {
-        width: 300,
-        height: 300,
-        style: `
-          position: absolute;
-          z-index: 10;
-          left: 0;
-          top: 0;
-          background-color: #fff;
-          visibility: ${debug ? 'visible' : 'hidden'};
-          pointer-events: ${debug ? 'inherit' : 'none'};
-        `,
-        src: '//mail.google.com/mail/u/0/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd
-      });
-      document.body.appendChild(window.iframe);
     });
+    window.iframe = Object.assign(document.createElement('iframe'), {
+      width: 300,
+      height: 300,
+      style: `
+        position: absolute;
+        z-index: 10;
+        left: 0;
+        top: 0;
+        background-color: #fff;
+        visibility: ${debug ? 'visible' : 'hidden'};
+        pointer-events: ${debug ? 'inherit' : 'none'};
+      `,
+      src: '//mail.google.com/mail/u/0/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd
+    });
+    document.body.appendChild(window.iframe);
   }
 }
 
-function insert() {
+async function insert() {
   try {
     document.getElementById('jspdf-print').remove();
     document.getElementById('jspdf-pdf').remove();
   }
   catch (e) {}
 
-  chrome.storage.local.get({
+  const prefs = await storage({
     'simple-mode': true,
     'print-mode': true
-  }, prefs => {
-    const parent = document.querySelector('.ade');
-    if (parent) {
-      if (prefs['print-mode']) {
-        const img = Object.assign(document.createElement('img'), {
-          src: chrome.runtime.getURL('/data/button/icon-blue.svg')
-        });
-        const print = Object.assign(document.createElement('span'), {
-          title: 'Save as PDF (print)',
-          id: 'jspdf-print'
-        });
-        print.classList.add('hk', 'J-J5-Ji');
-        print.appendChild(img);
-        print.dataset.cmd = 'save-as-pdf-print';
-        print.addEventListener('click', onClicked);
-        parent.insertBefore(print, parent.firstChild);
-      }
-      if (prefs['simple-mode']) {
-        const img = Object.assign(document.createElement('img'), {
-          src: chrome.runtime.getURL('/data/button/icon-orange.svg')
-        });
-        const pdf = Object.assign(document.createElement('span'), {
-          title: 'Save as PDF (simple)',
-          id: 'jspdf-pdf'
-        });
-        pdf.classList.add('hk', 'J-J5-Ji');
-        pdf.appendChild(img);
-        pdf.dataset.cmd = 'save-as-pdf-jspdf';
-        pdf.addEventListener('click', onClicked);
-        parent.insertBefore(pdf, parent.firstChild);
-      }
-    }
   });
+
+  const parent = document.querySelector('.ade');
+  if (parent) {
+    if (prefs['print-mode']) {
+      const img = Object.assign(document.createElement('img'), {
+        src: chrome.runtime.getURL('/data/button/icon-blue.svg')
+      });
+      const print = Object.assign(document.createElement('span'), {
+        title: 'Save as PDF (print)',
+        id: 'jspdf-print'
+      });
+      print.classList.add('hk', 'J-J5-Ji');
+      print.appendChild(img);
+      print.dataset.cmd = 'save-as-pdf-print';
+      print.addEventListener('click', onClicked);
+      parent.insertBefore(print, parent.firstChild);
+    }
+    if (prefs['simple-mode']) {
+      const img = Object.assign(document.createElement('img'), {
+        src: chrome.runtime.getURL('/data/button/icon-orange.svg')
+      });
+      const pdf = Object.assign(document.createElement('span'), {
+        title: 'Save as PDF (simple)',
+        id: 'jspdf-pdf'
+      });
+      pdf.classList.add('hk', 'J-J5-Ji');
+      pdf.appendChild(img);
+      pdf.dataset.cmd = 'save-as-pdf-jspdf';
+      pdf.addEventListener('click', onClicked);
+      parent.insertBefore(pdf, parent.firstChild);
+    }
+  }
 }
 
 window.addEventListener('hashchange', insert);
