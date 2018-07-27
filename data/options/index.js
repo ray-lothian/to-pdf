@@ -19,6 +19,8 @@ chrome.storage.local.get(config, prefs => {
   document.getElementById('print-mode').checked = prefs['print-mode'];
   document.getElementById('saveAs').checked = prefs.saveAs;
   document.getElementById('format').value = prefs.format;
+  document.getElementById('debug').checked = prefs.debug;
+  document.getElementById('faqs').checked = prefs.faqs;
 });
 
 function save() {
@@ -33,7 +35,9 @@ function save() {
     'simple-mode': document.getElementById('simple-mode').checked,
     'print-mode': document.getElementById('print-mode').checked,
     'saveAs': document.getElementById('saveAs').checked,
-    'format': document.getElementById('format').value
+    'format': document.getElementById('format').value,
+    'debug': document.getElementById('debug').checked,
+    'faqs': document.getElementById('faqs').checked
   }, () => {
     const status = document.getElementById('status');
     status.textContent = 'Options saved.';
@@ -42,3 +46,22 @@ function save() {
 }
 
 document.getElementById('save').addEventListener('click', save);
+
+document.getElementById('reset').addEventListener('click', e => {
+  if (e.detail === 1) {
+    const status = document.getElementById('status');
+    window.setTimeout(() => status.textContent = '', 750);
+    status.textContent = 'Double-click to reset!';
+  }
+  else {
+    localStorage.clear();
+    chrome.storage.local.clear(() => {
+      chrome.runtime.reload();
+      window.close();
+    });
+  }
+});
+
+document.getElementById('support').addEventListener('click', () => chrome.tabs.create({
+  url: chrome.runtime.getManifest().homepage_url + '&rd=donate'
+}));

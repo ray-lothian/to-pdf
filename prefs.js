@@ -12,6 +12,9 @@ config.size = 'letter';
 config.images = false;
 config.borders = false;
 
+config.debug = false;
+config.faqs = true;
+
 config.css = `html * {
   font-size: 13px !important;
   line-height: 20px !important;

@@ -63,8 +63,6 @@
       <td colspan="2"><h2>PDF size (simple mode):</h2></td>
     </tr>
   </table>
-
-
   <table width=100%>
     <colgroup>
       <col width=150>
@@ -127,16 +125,37 @@
       <td>Actual page's width &times; height</td>
     </tr>
   </table>
-  <p>
-    <label><input type="checkbox" id="images"> Include images in the output document (simple mode)</label>
-  </p>
+  <table width=100%>
+    <colgroup>
+      <col width=32>
+      <col>
+    </colgroup>
+   <tr>
+      <td colspan="2">
+        <h2>Misc:</h2>
+      </td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="debug"></td>
+      <td><label for="debug">Debug mode (display email preview in an iframe)</label></td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="images"></td>
+      <td><label for="images">Include images in the output document (simple mode)</label></td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="faqs"></td>
+      <td><label for="faqs">Open FAQs page on updates</label></td>
+    </tr>
+  </table>
   <p>
     <h2>Custom CSS style (simple mode):</h2>
     <textarea id="css" rows="6"></textarea>
   </p>
 
   <div>
-    <button id="save">Save</button>
+    <button id="reset">Reset</button>
+    <button id="support">Support Development</button> - <button id="save">Save</button>
     <span id="status"></span>
   </div>
 

@@ -20,14 +20,25 @@ function onClicked(e) {
     if (additional) {
       search = 'all';
     }
-
-    window.iframe = Object.assign(document.createElement('iframe'), {
-      width: 300,
-      height: 300,
-      style: 'position: absolute; left: 0; top: 0; background-color: #fff; visibility: hidden; pointer-events: none;',
-      src: '//mail.google.com/mail/u/0/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd
+    chrome.storage.local.get({
+      debug: false
+    }, ({debug}) => {
+      window.iframe = Object.assign(document.createElement('iframe'), {
+        width: 300,
+        height: 300,
+        style: `
+          position: absolute;
+          z-index: 10;
+          left: 0;
+          top: 0;
+          background-color: #fff;
+          visibility: ${debug ? 'visible' : 'hidden'};
+          pointer-events: ${debug ? 'inherit' : 'none'};
+        `,
+        src: '//mail.google.com/mail/u/0/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd
+      });
+      document.body.appendChild(window.iframe);
     });
-    document.body.appendChild(window.iframe);
   }
 }
 

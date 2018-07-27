@@ -42,7 +42,8 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
   else if (request.method === 'download') {
     chrome.storage.local.get({
       format: '[title] - [date] [time]',
-      saveAs: false
+      saveAs: false,
+      debug: false
     }, prefs => {
       const time = new Date();
       const gmt = (new Date(time - time.getTimezoneOffset() * 60000))
@@ -51,8 +52,8 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
       const filename = prefs.format
         .replace('[title]', sender.tab.title)
         .replace('[simple-title]', sender.tab.title.replace(/\s-\s[^\s]+@.*$/, ''))
-        .replace('[date]', time.toLocaleDateString().replace(/[:\/]/g, '.'))
-        .replace('[time]', time.toLocaleTimeString().replace(/[:\/]/g, '.'))
+        .replace('[date]', time.toLocaleDateString().replace(/[:/]/g, '.'))
+        .replace('[time]', time.toLocaleTimeString().replace(/[:/]/g, '.'))
         .replace('[gmt]', gmt)
         .replace(/[`~!@#$%^&*()_|+=?;:'",<>{}[\]\\/]/gi, '_')
         .replace('.pdf', '') + '.pdf';
@@ -72,10 +73,12 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
                 runAt: 'document_start',
                 allFrames: false,
                 code: `
-                  try {
-                    window.iframe.remove();
+                  if (${prefs.debug} === false) {
+                    try {
+                      window.iframe.remove();
+                    }
+                    catch (e) {}
                   }
-                  catch (e) {}
                   delete window.iframe;
                   document.querySelector('[data-cmd=${request.cmd}]').dataset.working = false;
                 `

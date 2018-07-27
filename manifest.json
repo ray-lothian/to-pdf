@@ -2,7 +2,7 @@
   "name": "Gmail to PDF",
   "description": "Convert your emails to PDF format locally (without a server interaction; secure and private) to backup your emails",
   "author": "Ray Lothian",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "manifest_version": 2,
   "permissions": [
     "storage",
@@ -14,6 +14,9 @@
     "scripts": [
       "common.js"
     ]
+  },
+  "storage": {
+    "managed_schema": "schema.json"
   },
   "content_scripts": [
     {
