@@ -11,7 +11,7 @@ var Font = function() {
   this.ctx = this.canvas.getContext('2d');
 };
 // list of supported fonts
-Font.prototype.supported = ['arial', 'sans-serif', 'serif', 'times new roman', 'monospace', 'tahoma'];
+Font.prototype.supported = ['arial', 'serif', 'times new roman', 'monospace', 'tahoma'];
 // list of fonts with only normal.ttf
 Font.prototype.normal = ['monospace', 'serif', 'tahoma'];
 Font.prototype.split = function(fonts) {

@@ -1,7 +1,9 @@
 'use strict';
 
 var storage = prefs => new Promise(resolve => {
-  chrome.storage.managed.get(prefs, prefs => chrome.storage.local.get(prefs, resolve));
+  chrome.storage.managed.get(prefs, ps => {
+    chrome.storage.local.get(chrome.runtime.lastError ? prefs : ps || prefs, resolve);
+  });
 });
 
 chrome.runtime.onMessage.addListener(async(request, sender, response) => {
@@ -28,7 +30,6 @@ chrome.runtime.onMessage.addListener(async(request, sender, response) => {
     return true;
   }
   else if (request.method === 'convert-to-pdf') {
-
     chrome.tabs.executeScript(tabId, {
       runAt: 'document_start',
       allFrames: false,

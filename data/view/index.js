@@ -2,7 +2,9 @@
 'use strict';
 
 var storage = prefs => new Promise(resolve => {
-  chrome.storage.managed.get(prefs, prefs => chrome.storage.local.get(prefs, resolve));
+  chrome.storage.managed.get(prefs, ps => {
+    chrome.storage.local.get(chrome.runtime.lastError ? prefs : ps || prefs, resolve);
+  });
 });
 
 var search = new URLSearchParams(location.search);
