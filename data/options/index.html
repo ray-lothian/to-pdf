@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Test Extension Options</title>
+  <title>Gmail to PDF :: Options Page</title>
+  <meta charset="utf-8">
   <style>
     body {
-      padding: 10px;
-      font-family: "Helvetica Neue",Helvetica,sans-serif;
-      font-size: 13px;
       min-width: 500px;
     }
     textarea {
       width: 100%;
     }
-    h2 {
-      font-weight: 200;
+    tr:first-of-type h2 {
+      margin-top: 0;
     }
     a {
       text-decoration: none;
@@ -164,7 +162,10 @@
     <h2>Custom CSS style (simple-mode):</h2>
     <textarea id="css" rows="6"></textarea>
   </div>
+
   <div class="admin">This extension supports managed storage. All the settings can be pre-configured by <a href="https://www.chromium.org/administrators/configuring-policy-for-extensions">the domain administrator</a></div>
+
+  <div id="explore"></div>
   <div>
     <button id="reset">Reset</button>
     <button id="support">Support Development</button> - <button id="save">Save</button>
@@ -173,5 +174,6 @@
 
   <script src="/prefs.js"></script>
   <script src="index.js"></script>
+  <script async src="matched.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 'use strict';
 
-var config = {};
+const config = {};
+window.config = config;
 
 config['simple-mode'] = true;
 config['print-mode'] = true;
@@ -18,7 +19,7 @@ config.faqs = true;
 config.css = `html * {
   font-size: 13px !important;
   line-height: 20px !important;
-  font-family: arial, sans-serif !important;
+  font-family: sans-serif, arial !important;
 }
 h1 {
   font-size: 24px !important;

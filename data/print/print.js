@@ -1,7 +1,7 @@
 /* globals jsPDF, search, config, storage */
 'use strict';
 
-var Font = function() {
+const Font = function() {
   this.canvas = Object.assign(document.createElement('canvas'), {
     width: 500,
     height: 128,
@@ -42,7 +42,7 @@ Font.prototype.destory = function() {
   document.body.removeChild(this.canvas);
 };
 
-var Node = function(node) {
+const Node = function(node) {
   this.node = node;
   this.nodeType = node.nodeType;
   this.noChild = Boolean(node.firstChild) === false;
@@ -120,7 +120,7 @@ Node.prototype.isMultiLine = function() {
   }
 };
 
-var PDF = function({
+const PDF = function({
   root = document.body,
   width = 612,
   height = 792,
@@ -143,34 +143,34 @@ var PDF = function({
   const myFont = new Font();
   const fonts = {};
   [...root.querySelectorAll('*')]
-  .filter(e => e.textContent.trim() && e.children.length === 0)
-  .forEach(e => {
-    const styles = window.getComputedStyle(e, null);
-    // detect style
-    e.dataset.style = 'normal';
-    const bold = styles['font-weight'] === 'bold' || styles['font-weight'] === '700';
-    if (styles['font-style'] === 'italic' && bold) {
-      e.dataset.style = 'bolditalic';
-    }
-    else if (styles['font-style'] === 'italic') {
-      e.dataset.style = 'italic';
-    }
-    else if (bold) {
-      e.dataset.style = 'bold';
-    }
-    // detect font
-    const family = e.style['font-family'] = e.dataset.font = myFont.detect(
-      e.textContent,
-      styles['font-family']
-    );
-    if (myFont.normal.indexOf(family) !== -1) {
-      e.dataset.style = e.style['font-weight'] = 'normal';
-    }
-    fonts[family] = family[family] || [];
-    if (fonts[family].indexOf(e.dataset.style) === -1) {
-      fonts[family].push(e.dataset.style);
-    }
-  });
+    .filter(e => e.textContent.trim() && e.children.length === 0)
+    .forEach(e => {
+      const styles = window.getComputedStyle(e, null);
+      // detect style
+      e.dataset.style = 'normal';
+      const bold = styles['font-weight'] === 'bold' || styles['font-weight'] === '700';
+      if (styles['font-style'] === 'italic' && bold) {
+        e.dataset.style = 'bolditalic';
+      }
+      else if (styles['font-style'] === 'italic') {
+        e.dataset.style = 'italic';
+      }
+      else if (bold) {
+        e.dataset.style = 'bold';
+      }
+      // detect font
+      const family = e.style['font-family'] = e.dataset.font = myFont.detect(
+        e.textContent,
+        styles['font-family']
+      );
+      if (myFont.normal.indexOf(family) !== -1) {
+        e.dataset.style = e.style['font-weight'] = 'normal';
+      }
+      fonts[family] = family[family] || [];
+      if (fonts[family].indexOf(e.dataset.style) === -1) {
+        fonts[family].push(e.dataset.style);
+      }
+    });
   this.fonts = fonts;
   myFont.destory();
   // generate pages
@@ -410,18 +410,15 @@ storage({
     for (const node of nodes) {
       await pdf.addNode(node);
     }
-  })
-  .then(() => {
+  }).then(() => {
     if (prefs.lines) {
       return lines().then(nodes => nodes.forEach(node => pdf.addLines(node)));
     }
-  })
-  .then(() => {
+  }).then(() => {
     if (prefs.images) {
       return images().then(nodes => nodes.forEach(img => pdf.addImage(img)));
     }
-  })
-  .then(() => {
+  }).then(() => {
     chrome.runtime.sendMessage({
       method: 'download',
       url: pdf.doc.output('datauristring'),

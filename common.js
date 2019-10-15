@@ -1,12 +1,12 @@
 'use strict';
 
-var storage = prefs => new Promise(resolve => {
+const storage = prefs => new Promise(resolve => {
   chrome.storage.managed.get(prefs, ps => {
     chrome.storage.local.get(chrome.runtime.lastError ? prefs : ps || prefs, resolve);
   });
 });
 
-chrome.runtime.onMessage.addListener(async(request, sender, response) => {
+chrome.runtime.onMessage.addListener(async (request, sender, response) => {
   const tabId = sender.tab.id;
   if (request.method === 'image-to-data') {
     const img = new Image();
@@ -113,37 +113,27 @@ chrome.browserAction.onClicked.addListener(tab => {
 
 // FAQs & Feedback
 {
-  const callback = () => storage({
-    'version': null,
-    'faqs': true,
-    'last-update': 0
-  }).then(prefs => {
-    const version = chrome.runtime.getManifest().version;
-
-    if (prefs.version ? (prefs.faqs && prefs.version !== version) : prefs.faqs) {
-      const now = Date.now();
-      const doUpdate = (now - prefs['last-update']) / 1000 / 60 / 60 / 24 > 30;
-      chrome.storage.local.set({
-        version,
-        'last-update': doUpdate ? Date.now() : prefs['last-update']
-      }, () => {
-        // do not display the FAQs page if last-update occurred less than 30 days ago.
-        if (doUpdate) {
-          const p = Boolean(prefs.version);
+  const {onInstalled, setUninstallURL, getManifest} = chrome.runtime;
+  const {name, version} = getManifest();
+  const page = getManifest().homepage_url;
+  onInstalled.addListener(({reason, previousVersion}) => {
+    storage({
+      'faqs': true,
+      'last-update': 0
+    }).then(prefs => {
+      if (reason === 'install' || (prefs.faqs && reason === 'update')) {
+        const doUpdate = (Date.now() - prefs['last-update']) / 1000 / 60 / 60 / 24 > 45;
+        if (doUpdate && previousVersion !== version) {
           chrome.tabs.create({
-            url: chrome.runtime.getManifest().homepage_url + '&version=' + version +
-              '&type=' + (p ? ('upgrade&p=' + prefs.version) : 'install'),
-            active: p === false
+            url: page + '?version=' + version +
+              (previousVersion ? '&p=' + previousVersion : '') +
+              '&type=' + reason,
+            active: reason === 'install'
           });
+          chrome.storage.local.set({'last-update': Date.now()});
         }
-      });
-    }
+      }
+    });
   });
-  chrome.runtime.onInstalled.addListener(callback);
-  chrome.runtime.onStartup.addListener(callback);
-
-  const {name, version} = chrome.runtime.getManifest();
-  chrome.runtime.setUninstallURL(
-    chrome.runtime.getManifest().homepage_url + '&rd=feedback&name=' + name + '&version=' + version
-  );
+  setUninstallURL(page + '?rd=feedback&name=' + encodeURIComponent(name) + '&version=' + version);
 }

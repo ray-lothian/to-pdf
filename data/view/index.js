@@ -1,13 +1,13 @@
 /* globals config */
 'use strict';
 
-var storage = prefs => new Promise(resolve => {
+const storage = prefs => new Promise(resolve => {
   chrome.storage.managed.get(prefs, ps => {
     chrome.storage.local.get(chrome.runtime.lastError ? prefs : ps || prefs, resolve);
   });
 });
 
-var search = new URLSearchParams(location.search);
+const search = new URLSearchParams(location.search);
 
 if (window.top !== window) {
   const script = Object.assign(document.createElement('script'), {
