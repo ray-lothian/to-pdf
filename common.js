@@ -55,14 +55,30 @@ chrome.runtime.onMessage.addListener(async (request, sender, response) => {
       .toISOString().slice(2, 10).replace(/[^0-9]/g, '');
 
     const filename = prefs.format
-      .replace('[title]', sender.tab.title)
-      .replace('[simple-title]', sender.tab.title.replace(/\s-\s[^\s]+@.*$/, ''))
+      .replace('[title]', request.title)
+      .replace('[simple-title]', request.title.replace(/\s-\s[^\s]+@.*$/, ''))
       .replace('[date]', time.toLocaleDateString().replace(/[:/]/g, '.'))
       .replace('[time]', time.toLocaleTimeString().replace(/[:/]/g, '.'))
       .replace('[gmt]', gmt)
       .replace(/[`~!@#$%^&*()_|+=?;:'",<>{}[\]\\/]/gi, '_')
       .replace('.pdf', '') + '.pdf';
 
+    const next = () => {
+      chrome.tabs.executeScript(tabId, {
+        runAt: 'document_start',
+        allFrames: false,
+        code: `
+          if (${prefs.debug} === false) {
+            try {
+              window.iframe.remove();
+            }
+            catch (e) {}
+          }
+          delete window.iframe;
+          document.querySelector('[data-cmd=${request.cmd}]').dataset.working = false;
+        `
+      });
+    };
     fetch(request.url)
       .then(res => res.blob())
       .then(blob => {
@@ -72,23 +88,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, response) => {
           url,
           saveAs: prefs.saveAs
         }, () => {
-          window.setTimeout(() => {
-            URL.revokeObjectURL(url);
-            chrome.tabs.executeScript(tabId, {
-              runAt: 'document_start',
-              allFrames: false,
-              code: `
-                if (${prefs.debug} === false) {
-                  try {
-                    window.iframe.remove();
-                  }
-                  catch (e) {}
-                }
-                delete window.iframe;
-                document.querySelector('[data-cmd=${request.cmd}]').dataset.working = false;
-              `
-            });
-          });
+          next();
+          window.setTimeout(() => URL.revokeObjectURL(url), 10000);
         });
       });
 

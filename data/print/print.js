@@ -149,6 +149,7 @@ const PDF = function({
       // detect style
       e.dataset.style = 'normal';
       const bold = styles['font-weight'] === 'bold' || styles['font-weight'] === '700';
+
       if (styles['font-style'] === 'italic' && bold) {
         e.dataset.style = 'bolditalic';
       }
@@ -163,10 +164,11 @@ const PDF = function({
         e.textContent,
         styles['font-family']
       );
+      // change styling as we do not support other types
       if (myFont.normal.indexOf(family) !== -1) {
         e.dataset.style = e.style['font-weight'] = 'normal';
       }
-      fonts[family] = family[family] || [];
+      fonts[family] = fonts[family] || [];
       if (fonts[family].indexOf(e.dataset.style) === -1) {
         fonts[family].push(e.dataset.style);
       }
@@ -376,15 +378,16 @@ PDF.prototype.loadFonts = function() {
       style
     })))
   );
-
+  console.log(fonts);
   return Promise.all(fonts.map(({family, style}) => {
-    const file = family + '/' + style + '.ttf';
-    const url = chrome.runtime.getURL('/data/assets/' + file);
+    const url = chrome.runtime.getURL('/data/assets/' + family + '/' + style + '.ttf');
     // console.log(url);
     return fetch(url).then(r => r.blob()).then(async blob => {
       const b64 = await this.toBase64(blob);
-      this.doc.addFileToVFS(file, b64);
-      this.doc.addFont(file, family, style);
+
+      const name = family;
+      this.doc.addFileToVFS(name, b64);
+      this.doc.addFont(name, family, style);
     }, e => console.error(e));
   }));
 };
@@ -402,7 +405,6 @@ storage({
     height: prefs.size === 'page' ? window.top.document.body.clientHeight : (prefs.height / 0.67)
   });
   // load fonts;
-  // console.log(pdf.fonts);
   await pdf.loadFonts();
   //
   const {nodes, lines, images} = pdf.collect();
@@ -422,7 +424,8 @@ storage({
     chrome.runtime.sendMessage({
       method: 'download',
       url: pdf.doc.output('datauristring'),
-      cmd: search.get('cm')
+      cmd: search.get('cm'),
+      title: document.title
     });
-  });
+  }).catch(e => console.log(e));
 });
