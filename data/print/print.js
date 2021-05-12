@@ -127,7 +127,7 @@ const PDF = function({
   padding = 50
 } = {}) {
   this.doc = new jspdf.jsPDF({
-    orientation: height > width ? 'portrait' : 'landscape',
+    orientation: width > height ? 'landscape' : 'portrait',
     unit: 'pt',
     format: [width, height].map(String)
   });
