@@ -21,11 +21,13 @@ config.css = `html * {
   line-height: 20px !important;
   font-family: sans-serif, arial !important;
 }
-h1 {
-  font-size: 24px !important;
+h1,
+h1 * {
+  font-size: 22px !important;
   line-height: 26.4px !important;
 }
-h3 {
+h3,
+h3 * {
   font-size: 14px !important;
   line-height: 15.4px !important;
 }
@@ -38,6 +40,15 @@ pre {
   font-size: 12px !important;
   line-height: 18.5714px !important;
 }
-.bodycontainer>table {
+html[data-sim=false] img,
+html[data-sim=false] svg,
+html[data-sim=false] picture {
+  display: none !important;
+}
+
+.bodycontainer > table {
+  display: none !important;
+}
+.bodycontainer > hr {
   display: none !important;
 }`;

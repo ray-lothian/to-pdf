@@ -1,6 +1,6 @@
 'use strict';
 
-var storage = prefs => new Promise(resolve => {
+const storage = prefs => new Promise(resolve => {
   chrome.storage.managed.get(prefs, ps => {
     chrome.storage.local.get(chrome.runtime.lastError ? prefs : ps || prefs, resolve);
   });
@@ -11,10 +11,15 @@ async function onClicked(e) {
   const cmd = span.dataset.cmd;
   if (cmd && cmd.startsWith('save-as-pdf-')) {
     span.dataset.working = true;
-    if (window.iframe) {
-      window.iframe.remove();
-    }
+
     let [search, th, additional] = document.location.hash.substr(1).split('/');
+    let num = /\d+/.exec(location.pathname);
+    if (num && num.length) {
+      num = num[0];
+    }
+    else {
+      num = 0;
+    }
     // try to find the thread id in the new UI
     const root = e.target.closest('.bkK');
     if (root) {
@@ -26,12 +31,17 @@ async function onClicked(e) {
     if (additional) {
       search = 'all';
     }
-    const {debug} = await storage({
-      debug: false
+    const {debug, images, width, height} = await storage({
+      debug: false,
+      images: false,
+      width: 612,
+      height: 792
     });
-    window.iframe = Object.assign(document.createElement('iframe'), {
-      width: 300,
-      height: 300,
+    const id = 'to-pdf' + Math.random();
+    const iframe = Object.assign(document.createElement('iframe'), {
+      id,
+      width,
+      height,
       style: `
         position: absolute;
         z-index: 10;
@@ -41,9 +51,9 @@ async function onClicked(e) {
         visibility: ${debug ? 'visible' : 'hidden'};
         pointer-events: ${debug ? 'inherit' : 'none'};
       `,
-      src: '//mail.google.com/mail/u/0/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd
+      src: '//mail.google.com/mail/u/' + num + '/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd + '&sim=' + images + '&tpid=' + id
     });
-    document.body.appendChild(window.iframe);
+    document.body.appendChild(iframe);
   }
 }
 
@@ -113,10 +123,14 @@ if (window.location.hash.split('/').length > 1) {
 }
 
 window.addEventListener('message', e => {
-  if (e.data === 'close-me') {
-    close();
-  }
-  else if (e.data === 'release-button') {
-    document.querySelector('[data-cmd=save-as-pdf-print]').dataset.working = false;
+  if (e.data && e.data.method === 'release-button') {
+    const b = document.querySelector('[data-cmd=save-as-pdf-print]');
+    if (b) {
+      b.dataset.working = false;
+    }
+    chrome.runtime.sendMessage({
+      method: 'close-me',
+      id: e.data.id
+    });
   }
 });

@@ -1,1 +1,1 @@
-https://raw.githubusercontent.com/MrRio/jsPDF/94064a9d5f448915494fd9f9d0f8e6151edfbef8/dist/jspdf.min.js
+https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.2.0/jspdf.umd.min.js

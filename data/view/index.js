@@ -9,44 +9,43 @@ const storage = prefs => new Promise(resolve => {
 
 const search = new URLSearchParams(location.search);
 
-if (window.top !== window) {
-  const script = Object.assign(document.createElement('script'), {
-    textContent: `
-      {
-        const print = window.print;
-        Object.defineProperty(window, 'print', {
-          configurable: true,
-          get() {
-            return () => {
-              if (${search.get('cm') === 'save-as-pdf-jspdf'}) {
-                window.postMessage('convert-to-pdf', '*');
-              }
-              else {
-                print();
-                window.top.postMessage('release-button', '*');
-              }
-            };
-          }
-        });
-      }
-    `
-  });
-  document.documentElement.appendChild(script);
-  if (search.get('cm') === 'save-as-pdf-jspdf') {
-    storage({
-      css: config.css
-    }).then(prefs => {
-      document.documentElement.appendChild(Object.assign(document.createElement('style'), {
-        textContent: prefs.css
-      }));
-    });
-  }
+document.documentElement.dataset.sim = search.get('sim');
 
-  window.addEventListener('message', e => {
-    if (e.data === 'convert-to-pdf') {
-      chrome.runtime.sendMessage({
-        method: 'convert-to-pdf'
+const script = Object.assign(document.createElement('script'), {
+  textContent: `
+    {
+      const print = window.print;
+      Object.defineProperty(window, 'print', {
+        configurable: true,
+        get() {
+          return () => {
+            if (${search.get('cm') !== 'save-as-pdf-jspdf'}) {
+              print();
+              window.top.postMessage({
+                method: 'release-button',
+                id: '${search.get('tpid')}'
+              }, '*');
+            }
+          };
+        }
       });
     }
+  `
+});
+document.documentElement.appendChild(script);
+
+if (search.get('cm') === 'save-as-pdf-jspdf') {
+  storage({
+    css: config.css
+  }).then(prefs => {
+    document.documentElement.appendChild(Object.assign(document.createElement('style'), {
+      textContent: prefs.css
+    }));
+  });
+}
+
+if (search.get('cm') === 'save-as-pdf-jspdf') {
+  chrome.runtime.sendMessage({
+    method: 'convert-to-pdf'
   });
 }

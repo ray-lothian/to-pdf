@@ -1,4 +1,4 @@
-/* globals jsPDF, search, config, storage */
+/* globals jspdf, search, config, storage */
 'use strict';
 
 const Font = function() {
@@ -126,19 +126,20 @@ const PDF = function({
   height = 792,
   padding = 50
 } = {}) {
-  this.doc = new jsPDF({
-    orientation: width > height ? 'portrait' : 'landscape',
+  this.doc = new jspdf.jsPDF({
+    orientation: height > width ? 'portrait' : 'landscape',
     unit: 'pt',
     format: [width, height].map(String)
   });
   this.root = root;
-  this.height = height - padding;
+  this.height = height;
+  this.padding = padding;
   this._fonts = [];
   // adjusting HTML document size
   root.style.width = width + 'px';
   root.style['box-sizing'] = 'border-box';
   root.style.margin = '0';
-  root.style.padding = padding + 'px';
+  root.style.padding = '0 ' + padding / 2 + 'px';
   // remove unsupported font-families
   const myFont = new Font();
   const fonts = {};
@@ -176,7 +177,7 @@ const PDF = function({
   this.fonts = fonts;
   myFont.destory();
   // generate pages
-  const pages = Math.ceil(root.clientHeight / height);
+  const pages = Math.ceil(root.clientHeight / (height - padding));
   for (let i = 1; i < pages; i += 1) {
     this.doc.addPage();
   }
@@ -198,7 +199,9 @@ PDF.prototype.collect = function() {
           }));
         });
       }
-      return Promise.all([...root.querySelectorAll('img')].map(fetch)).then(os => os.filter(o => o.data));
+      return Promise.all([...root.querySelectorAll('img')].map(fetch)).then(os => {
+        return os.filter(o => o.data);
+      });
     },
     lines: () => {
       const nodes = [...document.body.getElementsByTagName('*')]
@@ -268,18 +271,23 @@ PDF.prototype.toBase64 = function(blob) {
 PDF.prototype.addImage = function(node) {
   const rect = node.img.getBoundingClientRect();
   const {left, top, width, height} = this.adjustPage(rect);
+
   this.doc.addImage(node.data, 'PNG', left, top, width, height);
 };
 
 PDF.prototype.font = async function(styles) {
-  //
   // font size
   this.doc.setFontSize(styles['font-size']);
-  this.doc.setFontType(styles['font-style']);
   // font family
-  this.doc.setFont(styles['font-family']);
-  // color
-  this.doc.setTextColor(...styles.color);
+  this.doc.setFont(styles['font-family'], styles['font-style'] || 'normal');
+  // color (only apply if visible)
+  const w = Math.sqrt(styles.color.map(a => Math.pow(a, 2)).reduce((p, c) => p + c, 0) / 3);
+  if (w < 200) {
+    this.doc.setTextColor(...styles.color);
+  }
+  else {
+    this.doc.setTextColor(256 - w, 256 - w, 256 - w);
+  }
 };
 
 PDF.prototype.addNode = async function(node) {
@@ -312,8 +320,7 @@ PDF.prototype.addNode = async function(node) {
       }
     } */
     const lineHeight = this.doc.getLineHeight();
-    // console.log(value);
-    this.doc.text(value, left, top + lineHeight / 3 + height / 2);
+    this.doc.text(value.replace(/\n/g, ''), left, top + lineHeight / 3 + height / 2);
   });
 };
 
@@ -360,11 +367,12 @@ PDF.prototype.adjustPage = function(rect) {
   left += window.scrollX;
   top += window.scrollY;
 
-  const n = Math.floor(top / this.height);
+  const n = Math.floor(top / (this.height - this.padding));
 
   this.doc.setPage(n + 1);
+
   return {
-    top: top % this.height,
+    top: top % (this.height - this.padding) + this.padding / 2,
     left,
     width,
     height
@@ -378,7 +386,6 @@ PDF.prototype.loadFonts = function() {
       style
     })))
   );
-  console.log(fonts);
   return Promise.all(fonts.map(({family, style}) => {
     const url = chrome.runtime.getURL('/data/assets/' + family + '/' + style + '.ttf');
     // console.log(url);
@@ -392,17 +399,18 @@ PDF.prototype.loadFonts = function() {
   }));
 };
 
-storage({
+const start = () => storage({
   width: 612,
   height: 792,
   size: config.size,
-  padding: 10,
+  padding: 50,
   images: config.images,
   borders: config.borders
 }).then(async prefs => {
   const pdf = new PDF({
     width: prefs.size === 'page' ? window.top.document.body.clientWidth : (prefs.width / 0.67),
-    height: prefs.size === 'page' ? window.top.document.body.clientHeight : (prefs.height / 0.67)
+    height: prefs.size === 'page' ? window.top.document.body.clientHeight : (prefs.height / 0.67),
+    padding: prefs.padding / 0.67
   });
   // load fonts;
   await pdf.loadFonts();
@@ -418,14 +426,24 @@ storage({
     }
   }).then(() => {
     if (prefs.images) {
-      return images().then(nodes => nodes.forEach(img => pdf.addImage(img)));
+      return images().then(nodes => {
+        nodes.forEach(img => pdf.addImage(img));
+      });
     }
   }).then(() => {
     chrome.runtime.sendMessage({
       method: 'download',
       url: pdf.doc.output('datauristring'),
       cmd: search.get('cm'),
+      id: search.get('tpid'),
       title: document.title
     });
   }).catch(e => console.log(e));
 });
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', start);
+}
+else {
+  start();
+}

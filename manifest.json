@@ -1,7 +1,8 @@
 {
   "name": "Convert Gmail™ to PDF (locally)",
-  "description": "Convert your emails to PDF format locally (without a server interaction; secure and private) to backup your emails",
-  "version": "0.2.1",
+  "description": "__MSG_description__",
+  "default_locale": "en",
+  "version": "0.2.4",
   "manifest_version": 2,
   "permissions": [
     "storage",
@@ -25,7 +26,10 @@
       "js": ["/data/button/index.js"]
     },
     {
-      "matches": ["*://mail.google.com/mail/u/*/*&view=pt&*"],
+      "matches": [
+        "*://mail.google.com/mail/u/*/*&view=pt&*&tpid=*",
+        "*://mail.google.com/mail/u/*?ik=*&view=pt&*&tpid=*"
+      ],
       "run_at": "document_start",
       "js": [
         "/prefs.js",
@@ -54,5 +58,6 @@
      "64": "/data/icons/64.png",
      "128": "/data/icons/128.png",
      "256": "/data/icons/256.png"
-  }
+  },
+  "browser_action": {}
 }
