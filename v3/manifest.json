@@ -1,0 +1,62 @@
+{
+  "name": "Convert Gmail™ to PDF (locally)",
+  "description": "__MSG_description__",
+  "default_locale": "en",
+  "version": "0.3.0",
+  "manifest_version": 3,
+  "permissions": [
+    "storage",
+    "downloads",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://mail.google.com/*"
+  ],
+  "background": {
+    "service_worker": "worker.js"
+  },
+  "storage": {
+    "managed_schema": "schema.json"
+  },
+  "content_scripts": [{
+    "matches": ["*://mail.google.com/*"],
+    "run_at": "document_start",
+    "css": ["/data/button/index.css"],
+    "js": ["/data/button/index.js"]
+  }, {
+    "matches": [
+      "*://mail.google.com/mail/u/*/*&view=pt&*&tpid=*",
+      "*://mail.google.com/mail/u/*?ik=*&view=pt&*&tpid=*"
+    ],
+    "run_at": "document_start",
+    "js": [
+      "/prefs.js",
+      "/data/view/index.js"
+    ],
+    "all_frames": true
+  }],
+  "web_accessible_resources": [{
+    "resources": [
+      "data/button/icon-blue.svg",
+      "data/button/icon-orange.svg",
+      "data/print/index.html",
+      "data/assets/*.ttf",
+      "data/view/inject.js"
+    ],
+    "matches": ["*://mail.google.com/*"]
+  }],
+  "homepage_url": "https://add0n.com/to-pdf.html?from=gmail",
+  "options_ui": {
+    "page": "/data/options/index.html"
+  },
+  "icons": {
+     "16": "/data/icons/16.png",
+     "32": "/data/icons/32.png",
+     "48": "/data/icons/48.png",
+     "64": "/data/icons/64.png",
+     "128": "/data/icons/128.png",
+     "256": "/data/icons/256.png",
+     "512": "/data/icons/512.png"
+  },
+  "action": {}
+}

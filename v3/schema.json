@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "simple-mode": {
+      "title": "Simple-mode button (Orange button)",
+      "type": "boolean"
+    },
+    "print-mode": {
+      "title": "Print-mode button (Blue button)",
+      "type": "boolean"
+    },
+    "saveAs": {
+      "title": "Display the save dialog",
+      "type": "boolean"
+    },
+    "format": {
+      "title": "Filename format",
+      "type": "string"
+    },
+    "size": {
+      "title": "Page Size (simple-mode)",
+      "description": "e.g.: letter, A4; use 'page' to get the print dimension from Gmail's page",
+      "type": "string"
+    },
+    "images": {
+      "title": "Include images in the output document (simple-mode)",
+      "type": "boolean"
+    },
+    "faqs": {
+      "title": "Open FAQs page on updates",
+      "type": "boolean"
+    }
+  }
+}

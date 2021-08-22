@@ -1,4 +1,4 @@
-/* globals jspdf, search, config, storage */
+/* globals jspdf, search, config, storage, tabId */
 'use strict';
 
 const Font = function() {
@@ -188,18 +188,39 @@ PDF.prototype.collect = function() {
   const root = this.root;
   return {
     images: () => {
-      function fetch(img) {
-        return new Promise(resolve => {
-          chrome.runtime.sendMessage({
-            method: 'image-to-data',
+      const get = img => {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 30000);
+
+        const rect = img.getBoundingClientRect();
+
+        if (img && img.src && rect.width && rect.height) {
+          return fetch(img.src, {
+            signal: controller.signal
+          }).then(r => {
+            if (r.ok) {
+              return r.blob().then(blob => new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+              }));
+            }
+            else {
+              throw Error('abort');
+            }
+          }).catch(() => new Promise(resolve => chrome.runtime.sendMessage({
+            method: 'bg-image',
             src: img.src
-          }, data => resolve({
-            img,
-            data
+          }, resolve))).then(data => ({
+            data,
+            img
           }));
-        });
-      }
-      return Promise.all([...root.querySelectorAll('img')].map(fetch)).then(os => {
+        }
+        else {
+          return {};
+        }
+      };
+      return Promise.all([...root.querySelectorAll('img')].map(get)).then(os => {
         return os.filter(o => o.data);
       });
     },
@@ -293,34 +314,20 @@ PDF.prototype.font = async function(styles) {
 PDF.prototype.addNode = async function(node) {
   await this.font(node.styles);
   return this.split(node).forEach(({rect, value}) => {
-    /* const div = document.createElement('div');
-    div.style = `
-      position: absolute;
-      top: ${rect.top}px;
-      left: ${rect.left}px;
-      width: ${rect.width}px;
-      height: ${rect.height}px;
-      border: solid 1px blue;
-    `;
-    document.body.appendChild(div); */
-
     const {left, top, height} = this.adjustPage(rect);
-    // make sure text is fitting inside the rect
-    /* let loop = true;
-    while (loop) {
-      let fontSize = this.doc.internal.getFontSize();
-      const w = this.doc.getStringUnitWidth(value) * fontSize;
-      if (w > width) {
-        console.log(width, w, value, fontSize);
-        fontSize -= 0.1;
-        this.doc.setFontSize(fontSize);
-      }
-      else {
-        loop = false;
-      }
-    } */
+
     const lineHeight = this.doc.getLineHeight();
-    this.doc.text(value.replace(/\n/g, ''), left, top + lineHeight / 3 + height / 2);
+
+    value = value.replace(/\n/g, '');
+    const link = node.parent ? node.parent.closest('a') : '';
+    if (link && link.href) {
+      this.doc.textWithLink(value, left, top + lineHeight / 3 + height / 2, {
+        url: link.href
+      });
+    }
+    else {
+      this.doc.text(value, left, top + lineHeight / 3 + height / 2);
+    }
   });
 };
 
@@ -399,6 +406,43 @@ PDF.prototype.loadFonts = function() {
   }));
 };
 
+const download = o => {
+  storage({
+    format: '[title] - [date] [time]',
+    saveAs: false,
+    debug: false
+  }).then(prefs => {
+    const time = new Date();
+    const gmt = (new Date(time - time.getTimezoneOffset() * 60000))
+      .toISOString().slice(2, 10).replace(/[^0-9]/g, '');
+
+    const filename = prefs.format
+      .replace('[title]', o.title)
+      .replace('[simple-title]', o.title.replace(/\s-\s[^\s]+@.*$/, ''))
+      .replace('[date]', time.toLocaleDateString().replace(/[:/]/g, '.'))
+      .replace('[time]', time.toLocaleTimeString().replace(/[:/]/g, '.'))
+      .replace('[gmt]', gmt)
+      .replace(/[`~!@#$%^&*()_|+=?;:'",<>{}[\]\\/]/gi, '_')
+      .replace('.pdf', '') + '.pdf';
+
+    fetch(o.url).then(r => r.blob()).then(blob => {
+      const url = URL.createObjectURL(blob);
+      chrome.runtime.sendMessage({
+        method: 'download-pdf',
+        filename,
+        url,
+        saveAs: prefs.saveAs
+      });
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }).finally(() => chrome.runtime.sendMessage({
+      method: 'release-button',
+      cmd: o.cmd,
+      id: o.id,
+      debug: prefs.debug
+    }));
+  });
+};
+
 const start = () => storage({
   width: 612,
   height: 792,
@@ -431,8 +475,7 @@ const start = () => storage({
       });
     }
   }).then(() => {
-    chrome.runtime.sendMessage({
-      method: 'download',
+    download({
       url: pdf.doc.output('datauristring'),
       cmd: search.get('cm'),
       id: search.get('tpid'),
