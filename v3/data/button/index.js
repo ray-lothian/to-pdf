@@ -12,7 +12,7 @@ async function onClicked(e) {
   if (cmd && cmd.startsWith('save-as-pdf-')) {
     span.dataset.working = true;
 
-    let [search, th, additional] = document.location.hash.substr(1).split('/');
+    // account id
     let num = /\d+/.exec(location.pathname);
     if (num && num.length) {
       num = num[0];
@@ -21,16 +21,10 @@ async function onClicked(e) {
       num = 0;
     }
     // try to find the thread id in the new UI
-    const root = e.target.closest('.bkK');
-    if (root) {
-      const legacy = root.querySelector('[data-legacy-thread-id].hP');
-      if (legacy) {
-        th = legacy.dataset.legacyThreadId || th;
-      }
-    }
-    if (additional) {
-      search = 'all';
-    }
+    const root = e.target.closest('.aia') || e.target.closest('.bkK') || document.body;
+    const legacy = root.querySelector('[data-legacy-thread-id]');
+    const perm = root.querySelector('[data-thread-perm-id]');
+
     const {debug, images, width, height} = await storage({
       debug: false,
       images: false,
@@ -38,22 +32,31 @@ async function onClicked(e) {
       height: 792
     });
     const id = 'to-pdf' + Math.random();
-    const iframe = Object.assign(document.createElement('iframe'), {
-      id,
-      width,
-      height,
-      style: `
-        position: absolute;
-        z-index: 10;
-        left: 0;
-        top: 0;
-        background-color: #fff;
-        visibility: ${debug ? 'visible' : 'hidden'};
-        pointer-events: ${debug ? 'inherit' : 'none'};
-      `,
-      src: '//mail.google.com/mail/u/' + num + '/?ui=2&view=pt&search=' + search + '&th=' + th + '&cm=' + cmd + '&sim=' + images + '&tpid=' + id
-    });
-    document.body.appendChild(iframe);
+    if (perm || legacy) {
+      const src = perm ?
+        '//mail.google.com/mail/u/' + num + '?view=pt&search=all&permthid=' + encodeURIComponent(perm.dataset.threadPermId) :
+        '//mail.google.com/mail/u/' + num + '/?ui=2&view=pt&search=all&th=' + encodeURIComponent(legacy.dataset.legacyThreadId);
+
+      const iframe = Object.assign(document.createElement('iframe'), {
+        id,
+        width,
+        height,
+        style: `
+          position: absolute;
+          z-index: 10;
+          left: 0;
+          top: 0;
+          background-color: #fff;
+          visibility: ${debug ? 'visible' : 'hidden'};
+          pointer-events: ${debug ? 'inherit' : 'none'};
+        `,
+        src: src + '&cm=' + cmd + '&sim=' + images + '&tpid=' + id
+      });
+      document.body.appendChild(iframe);
+    }
+    else {
+      alert('Cannot find the thread id! Please report this');
+    }
   }
 }
 
@@ -69,7 +72,7 @@ async function insert() {
     'print-mode': true
   });
 
-  const parent = document.querySelector('.ade');
+  const parent = [...document.querySelectorAll('.ade')].filter(e => e.offsetHeight).shift();
   if (parent) {
     if (prefs['print-mode']) {
       const img = Object.assign(document.createElement('img'), {
@@ -102,25 +105,16 @@ async function insert() {
   }
 }
 
-window.addEventListener('hashchange', insert);
-
-if (window.location.hash.split('/').length > 1) {
-  window.addEventListener('load', () => {
-    if (document.querySelector('.ade')) {
+const observe = () => {
+  const e = document.querySelector('.ade');
+  if (e) {
+    const b = document.getElementById('jspdf-print');
+    if (!b || b.offsetHeight === 0) {
       insert();
     }
-    else {
-      const observer = new MutationObserver(() => {
-        if (document.querySelector('.ade')) {
-          observer.disconnect();
-          insert();
-        }
-      });
-
-      observer.observe(document.body, {childList: true});
-    }
-  });
-}
+  }
+};
+document.addEventListener('animationstart', observe);
 
 window.addEventListener('message', e => {
   if (e.data && e.data.method === 'release-button') {

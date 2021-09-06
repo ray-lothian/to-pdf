@@ -2,7 +2,7 @@
   "name": "Convert Gmail™ to PDF (locally)",
   "description": "__MSG_description__",
   "default_locale": "en",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "manifest_version": 3,
   "permissions": [
     "storage",
@@ -25,8 +25,8 @@
     "js": ["/data/button/index.js"]
   }, {
     "matches": [
-      "*://mail.google.com/mail/u/*/*&view=pt&*&tpid=*",
-      "*://mail.google.com/mail/u/*?ik=*&view=pt&*&tpid=*"
+      "*://mail.google.com/mail/*save-as-pdf-jspdf*",
+      "*://mail.google.com/mail/*save-as-pdf-print*"
     ],
     "run_at": "document_start",
     "js": [

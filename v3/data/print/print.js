@@ -181,7 +181,6 @@ const PDF = function({
   for (let i = 1; i < pages; i += 1) {
     this.doc.addPage();
   }
-  // console.log(this.doc.getFontList())
 };
 
 PDF.prototype.collect = function() {
@@ -481,7 +480,7 @@ const start = () => storage({
       id: search.get('tpid'),
       title: document.title
     });
-  }).catch(e => console.log(e));
+  }).catch(e => console.warn(e));
 });
 
 if (document.readyState === 'loading') {

@@ -16,3 +16,17 @@
   padding: 0;
   pointer-events: none;
 }
+
+.ade {
+  animation-duration: 1ms;
+  animation-name: insertpdf;
+}
+
+@keyframes insertpdf {
+  from {
+    color: transparent;
+  }
+  to {
+    color: #202124;
+  }
+}
