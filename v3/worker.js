@@ -29,20 +29,29 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
   }
   else if (request.method === 'download-pdf') {
     chrome.downloads.download({
-      filename: request.filename,
+      filename: request.filename + '.pdf',
       url: request.url,
       saveAs: false
     }, () => {
       const lastError = chrome.runtime.lastError;
       if (lastError) {
         chrome.downloads.download({
-          filename: 'email.pdf',
+          filename: request.filename.replace(/[`~!@#$%^&*()_|+=?;:'",<>{}[\]\\/]/gi, '_') + '.pdf',
           url: request.url,
           saveAs: false
+        }, () => {
+          const lastError = chrome.runtime.lastError;
+          if (lastError) {
+            chrome.downloads.download({
+              filename: 'email.pdf',
+              url: request.url,
+              saveAs: false
+            });
+          }
         });
       }
+      return false;
     });
-    return false;
   }
   else if (request.method === 'release-button') {
     chrome.scripting.executeScript({

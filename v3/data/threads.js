@@ -38,27 +38,40 @@
 
       await new Promise(resolve => {
         const id = 'to-pdf' + Math.random();
-        const src = `https://mail.google.com/mail/u/${num}?view=pt&search=all` +
+        const src = `https://mail.google.com/mail/u/${num}/?view=pt&search=all` +
           '&permthid=' + encodeURIComponent(thread) +
           '&cm=save-as-pdf-jspdf' + '&sim=' + images +
           '&tpid=' + id;
-        const iframe = Object.assign(document.createElement('iframe'), {
-          id,
-          width,
-          height,
-          style: `
-            position: absolute;
-            z-index: 10;
-            left: 0;
-            top: 0;
-            background-color: #fff;
-            visibility: ${debug ? 'visible' : 'hidden'};
-            pointer-events: ${debug ? 'inherit' : 'none'};
-          `
+
+        const next = src => {
+          const iframe = Object.assign(document.createElement('iframe'), {
+            id,
+            width,
+            height,
+            style: `
+              position: absolute;
+              z-index: 10;
+              left: 0;
+              top: 0;
+              background-color: #fff;
+              visibility: ${debug ? 'visible' : 'hidden'};
+              pointer-events: ${debug ? 'inherit' : 'none'};
+            `
+          });
+          iframe.src = src;
+          document.body.appendChild(iframe);
+          setTimeout(resolve, 1000);
+        };
+
+        // https://github.com/ray-lothian/to-pdf/issues/8
+        fetch(src).then(r => {
+          if (r.ok) {
+            next(src);
+          }
+          else {
+            next(src + '&mb=1');
+          }
         });
-        iframe.src = src;
-        document.body.appendChild(iframe);
-        setTimeout(resolve, 1000);
       });
     }
     chrome.runtime.sendMessage({

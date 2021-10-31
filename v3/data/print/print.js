@@ -409,20 +409,28 @@ const download = o => {
   storage({
     format: '[title] - [date] [time]',
     saveAs: false,
-    debug: false
+    debug: false,
+    date: true
   }).then(prefs => {
-    const time = new Date();
+    // try to get email's date
+    const d = (document.querySelector('.message td[align="right"] [size="-1"]')?.textContent || '').replace(' at ', ', ');
+
+    const time = new Date(
+      Date.parse(d) || Date.now()
+    );
     const gmt = (new Date(time - time.getTimezoneOffset() * 60000))
       .toISOString().slice(2, 10).replace(/[^0-9]/g, '');
 
     const filename = prefs.format
       .replace('[title]', o.title)
       .replace('[simple-title]', o.title.replace(/\s-\s[^\s]+@.*$/, ''))
-      .replace('[date]', time.toLocaleDateString().replace(/[:/]/g, '.'))
-      .replace('[time]', time.toLocaleTimeString().replace(/[:/]/g, '.'))
+      .replace('[date]', time.getFullYear() + '.' +
+        (time.getMonth() + 1).toString().padStart(2, '0') + '.' +
+        time.getDate().toString().padStart(2, '0'))
+      .replace('[time]', time.getHours().toString().padStart(2, '0') + '.' + time.getMinutes().toString().padStart(2, '0'))
       .replace('[gmt]', gmt)
-      .replace(/[`~!@#$%^&*()_|+=?;:'",<>{}[\]\\/]/gi, '_')
-      .replace('.pdf', '') + '.pdf';
+      .replace('[json-time]', time.toJSON())
+      .replace('.pdf', '');
 
     fetch(o.url).then(r => r.blob()).then(blob => {
       const url = URL.createObjectURL(blob);

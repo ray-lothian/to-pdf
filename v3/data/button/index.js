@@ -34,25 +34,35 @@ async function onClicked(e) {
     const id = 'to-pdf' + Math.random();
     if (perm || legacy) {
       const src = perm ?
-        '//mail.google.com/mail/u/' + num + '?view=pt&search=all&permthid=' + encodeURIComponent(perm.dataset.threadPermId) :
+        '//mail.google.com/mail/u/' + num + '/?view=pt&search=all&permthid=' + encodeURIComponent(perm.dataset.threadPermId) :
         '//mail.google.com/mail/u/' + num + '/?ui=2&view=pt&search=all&th=' + encodeURIComponent(legacy.dataset.legacyThreadId);
 
-      const iframe = Object.assign(document.createElement('iframe'), {
-        id,
-        width,
-        height,
-        style: `
-          position: absolute;
-          z-index: 10;
-          left: 0;
-          top: 0;
-          background-color: #fff;
-          visibility: ${debug ? 'visible' : 'hidden'};
-          pointer-events: ${debug ? 'inherit' : 'none'};
-        `,
-        src: src + '&cm=' + cmd + '&sim=' + images + '&tpid=' + id
+      const next = src => {
+        const iframe = Object.assign(document.createElement('iframe'), {
+          id,
+          width,
+          height,
+          style: `
+            position: absolute;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            background-color: #fff;
+            visibility: ${debug ? 'visible' : 'hidden'};
+            pointer-events: ${debug ? 'inherit' : 'none'};
+          `,
+          src: src + '&cm=' + cmd + '&sim=' + images + '&tpid=' + id
+        });
+        document.body.appendChild(iframe);
+      };
+      fetch(src).then(r => {
+        if (r.ok) {
+          next(src);
+        }
+        else {
+          next(src + '&mb=1');
+        }
       });
-      document.body.appendChild(iframe);
     }
     else {
       alert('Cannot find the thread id! Please report this');
