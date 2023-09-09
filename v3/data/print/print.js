@@ -432,21 +432,17 @@ const download = o => {
       .replace('[json-time]', time.toJSON())
       .replace('.pdf', '');
 
-    fetch(o.url).then(r => r.blob()).then(blob => {
-      const url = URL.createObjectURL(blob);
-      chrome.runtime.sendMessage({
-        method: 'download-pdf',
-        filename,
-        url,
-        saveAs: prefs.saveAs
-      });
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-    }).finally(() => chrome.runtime.sendMessage({
+    const a = document.createElement('a');
+    a.href = o.url;
+    a.download = filename + '.pdf';
+    a.click();
+
+    chrome.runtime.sendMessage({
       method: 'release-button',
       cmd: o.cmd,
       id: o.id,
       debug: prefs.debug
-    }));
+    });
   });
 };
 

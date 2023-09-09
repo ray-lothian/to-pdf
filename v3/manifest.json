@@ -2,12 +2,12 @@
   "name": "Convert Gmail™ to PDF (locally)",
   "description": "__MSG_description__",
   "default_locale": "en",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "manifest_version": 3,
   "permissions": [
     "storage",
-    "downloads",
-    "scripting"
+    "scripting",
+    "declarativeContent"
   ],
   "host_permissions": [
     "*://mail.google.com/*"
@@ -37,15 +37,15 @@
   }],
   "web_accessible_resources": [{
     "resources": [
-      "data/button/icon-blue.svg",
-      "data/button/icon-orange.svg",
-      "data/print/index.html",
-      "data/assets/*.ttf",
-      "data/view/inject.js"
+      "/data/button/icon-blue.svg",
+      "/data/button/icon-orange.svg",
+      "/data/print/index.html",
+      "/data/assets/*.ttf",
+      "/data/view/inject.js"
     ],
     "matches": ["*://mail.google.com/*"]
   }],
-  "homepage_url": "https://add0n.com/to-pdf.html?from=gmail",
+  "homepage_url": "https://webextension.org/listing/to-pdf.html",
   "options_ui": {
     "page": "/data/options/index.html"
   },

@@ -9,10 +9,8 @@ const storage = prefs => new Promise(resolve => {
 chrome.runtime.onMessage.addListener((request, sender, response) => {
   const tabId = sender.tab.id;
   if (request.method === 'bg-image') {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 30000);
     fetch(request.src, {
-      signal: controller.signal
+      signal: AbortSignal.timeout(30000)
     }).then(r => {
       if (r.ok) {
         return r.blob().then(blob => new Promise(resolve => {
@@ -26,32 +24,6 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
       }
     }).then(response, () => response(''));
     return true;
-  }
-  else if (request.method === 'download-pdf') {
-    chrome.downloads.download({
-      filename: request.filename + '.pdf',
-      url: request.url,
-      saveAs: false
-    }, () => {
-      const lastError = chrome.runtime.lastError;
-      if (lastError) {
-        chrome.downloads.download({
-          filename: request.filename.replace(/[`~!@#$%^&*()_|+=?;:'",<>{}[\]\\/]/gi, '_') + '.pdf',
-          url: request.url,
-          saveAs: false
-        }, () => {
-          const lastError = chrome.runtime.lastError;
-          if (lastError) {
-            chrome.downloads.download({
-              filename: 'email.pdf',
-              url: request.url,
-              saveAs: false
-            });
-          }
-        });
-      }
-      return false;
-    });
   }
   else if (request.method === 'release-button') {
     chrome.scripting.executeScript({
@@ -139,6 +111,27 @@ chrome.action.onClicked.addListener(async tab => {
       url: 'https://mail.google.com/mail/u/0/#inbox'
     });
   }
+});
+
+// button
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
+    chrome.declarativeContent.onPageChanged.addRules([{
+      conditions: [
+        new chrome.declarativeContent.PageStateMatcher({
+          pageUrl: {
+            hostEquals: 'mail.google.com'
+          },
+          css: ['path[d^=M648-624v-]']
+        })
+      ],
+      actions: [
+        new chrome.declarativeContent.RequestContentScript({
+          js: ['/data/button/inject.js']
+        })
+      ]
+    }]);
+  });
 });
 
 

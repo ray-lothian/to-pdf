@@ -6,6 +6,7 @@ const storage = prefs => new Promise(resolve => {
   });
 });
 
+// eslint-disable-next-line no-unused-vars
 async function onClicked(e) {
   const span = e.target;
   const cmd = span.dataset.cmd;
@@ -70,63 +71,7 @@ async function onClicked(e) {
   }
 }
 
-async function insert() {
-  try {
-    document.getElementById('jspdf-print').remove();
-    document.getElementById('jspdf-pdf').remove();
-  }
-  catch (e) {}
-
-  const prefs = await storage({
-    'simple-mode': true,
-    'print-mode': true
-  });
-
-  const parent = [...document.querySelectorAll('.ade')].filter(e => e.offsetHeight).shift();
-  if (parent) {
-    if (prefs['print-mode']) {
-      const img = Object.assign(document.createElement('img'), {
-        src: chrome.runtime.getURL('/data/button/icon-blue.svg')
-      });
-      const print = Object.assign(document.createElement('span'), {
-        title: 'Save as PDF (print)',
-        id: 'jspdf-print'
-      });
-      print.classList.add('hk', 'J-J5-Ji');
-      print.appendChild(img);
-      print.dataset.cmd = 'save-as-pdf-print';
-      print.addEventListener('click', onClicked);
-      parent.insertBefore(print, parent.firstChild);
-    }
-    if (prefs['simple-mode']) {
-      const img = Object.assign(document.createElement('img'), {
-        src: chrome.runtime.getURL('/data/button/icon-orange.svg')
-      });
-      const pdf = Object.assign(document.createElement('span'), {
-        title: 'Save as PDF (simple)',
-        id: 'jspdf-pdf'
-      });
-      pdf.classList.add('hk', 'J-J5-Ji');
-      pdf.appendChild(img);
-      pdf.dataset.cmd = 'save-as-pdf-jspdf';
-      pdf.addEventListener('click', onClicked);
-      parent.insertBefore(pdf, parent.firstChild);
-    }
-  }
-}
-
-const observe = () => {
-  const e = document.querySelector('.ade');
-  if (e) {
-    const b = document.getElementById('jspdf-print');
-    if (!b || b.offsetHeight === 0) {
-      insert();
-    }
-  }
-};
-document.addEventListener('animationstart', observe);
-
-window.addEventListener('message', e => {
+addEventListener('message', e => {
   if (e.data && e.data.method === 'release-button') {
     const b = document.querySelector('[data-cmd=save-as-pdf-print]');
     if (b) {

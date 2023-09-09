@@ -1,4 +1,4 @@
-/* globals config */
+/* global config */
 'use strict';
 
 const storage = prefs => new Promise(resolve => {
