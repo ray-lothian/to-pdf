@@ -3,6 +3,9 @@
   cursor: pointer;
   user-select: none;
 }
+[data-cmd=save-as-pdf-jspdf] {
+  margin-right: 5px;
+}
 [data-cmd=save-as-pdf-jspdf][data-working=true],
 [data-cmd=save-as-pdf-print][data-working=true] {
   opacity: 0.5;

@@ -3,7 +3,7 @@
   const locate = {
     parent() {
       // find print's svg
-      return document.querySelector('path[d^=M648-624v-]')?.closest('div');
+      return document.querySelector('path[d^=M648-624V-], path[d^=M648-624v-]')?.closest('div');
     }
   };
 
@@ -20,6 +20,7 @@
     catch (e) {}
 
     const parent = locate.parent();
+
     if (parent) {
       const prefs = await storage({
         'simple-mode': true,

@@ -55,7 +55,7 @@ chrome.runtime.onMessage.addListener((request, sender, response) => {
       }
     }).then(() => chrome.scripting.executeScript({
       target,
-      files: ['/data/print/jspdf.umd.min.js']
+      files: ['/data/print/jspdf-modified.js']
     })).then(() => {
       chrome.scripting.executeScript({
         target,
@@ -122,7 +122,7 @@ chrome.runtime.onInstalled.addListener(() => {
           pageUrl: {
             hostEquals: 'mail.google.com'
           },
-          css: ['path[d^=M648-624v-]']
+          css: ['path[d^=M648-624V-], path[d^=M648-624v-]']
         })
       ],
       actions: [

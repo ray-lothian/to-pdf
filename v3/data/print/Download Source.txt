@@ -1,1 +1,3 @@
-https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
+https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.js
+  section related to "pdfobject.min.js" is commented based on Chrome review request,
+  although it is not used by this extension. (Lines 3896-3916)
