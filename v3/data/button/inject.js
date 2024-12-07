@@ -8,16 +8,16 @@
   };
 
   const insert = async () => {
+    console.log('inserting');
+
     if (insert.busy) {
       return;
     }
 
     insert.busy = true;
-    try {
-      document.getElementById('jspdf-print').remove();
-      document.getElementById('jspdf-pdf').remove();
-    }
-    catch (e) {}
+    document.getElementById('jspdf-print')?.remove();
+    document.getElementById('jspdf-pdf')?.remove();
+    document.getElementById('jspdf-parent')?.remove();
 
     const parent = locate.parent();
 
@@ -27,6 +27,17 @@
         'print-mode': true
       });
 
+      const div = document.createElement('div');
+      div.id = 'jspdf-parent';
+      div.style = `
+        display: flex;
+        gap: 1px;
+        order: 2;
+        margin-block: 5px;
+        margin-left: 10px;
+      `;
+      parent.parentElement.parentElement.appendChild(div);
+
       if (prefs['print-mode']) {
         const img = Object.assign(document.createElement('img'), {
           src: chrome.runtime.getURL('/data/button/icon-blue.svg')
@@ -35,11 +46,10 @@
           title: 'Save as PDF (print)',
           id: 'jspdf-print'
         });
-        print.classList.add('hk', 'J-J5-Ji');
         print.appendChild(img);
         print.dataset.cmd = 'save-as-pdf-print';
         print.addEventListener('click', onClicked);
-        parent.insertBefore(print, parent.firstChild);
+        div.appendChild(print);
       }
       if (prefs['simple-mode']) {
         const img = Object.assign(document.createElement('img'), {
@@ -49,11 +59,10 @@
           title: 'Save as PDF (simple)',
           id: 'jspdf-pdf'
         });
-        pdf.classList.add('hk', 'J-J5-Ji');
         pdf.appendChild(img);
         pdf.dataset.cmd = 'save-as-pdf-jspdf';
         pdf.addEventListener('click', onClicked);
-        parent.insertBefore(pdf, parent.firstChild);
+        div.appendChild(pdf);
       }
     }
     insert.busy = false;

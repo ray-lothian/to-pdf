@@ -413,7 +413,8 @@ const download = o => {
     date: true
   }).then(prefs => {
     // try to get email's date
-    const d = (document.querySelector('.message td[align="right"] [size="-1"]')?.textContent || '').replace(' at ', ', ');
+    const d = (document.querySelector('.message td[align="right"] [size="-1"]')?.textContent || '')
+      .replace(' at ', ', ');
 
     const time = new Date(
       Date.parse(d) || Date.now()
@@ -423,11 +424,14 @@ const download = o => {
 
     const filename = prefs.format
       .replace('[title]', o.title)
+      .replace('[sender-name]', o.sender?.name || 'NA')
+      .replace('[sender-email]', o.sender?.email || 'NA')
       .replace('[simple-title]', o.title.replace(/\s-\s[^\s]+@.*$/, ''))
       .replace('[date]', time.getFullYear() + '.' +
         (time.getMonth() + 1).toString().padStart(2, '0') + '.' +
         time.getDate().toString().padStart(2, '0'))
-      .replace('[time]', time.getHours().toString().padStart(2, '0') + '.' + time.getMinutes().toString().padStart(2, '0'))
+      .replace('[time]', time.getHours().toString().padStart(2, '0') + '.' +
+        time.getMinutes().toString().padStart(2, '0'))
       .replace('[gmt]', gmt)
       .replace('[json-time]', time.toJSON())
       .replace('.pdf', '');
@@ -478,11 +482,25 @@ const start = () => storage({
       });
     }
   }).then(() => {
+    // try to find sender
+    const e = document.querySelector('.message font[size="-1"]');
+    const sender = {};
+    if (e) {
+      const [b, t] = e.childNodes;
+      if (b && b.tagName === 'B') {
+        sender.name = b.textContent.trim();
+      }
+      if (t && t.nodeType === 3) {
+        sender.email = t.nodeValue?.replace(/^</, '')?.replace(/>$/, '').trim();
+      }
+    }
+
     download({
       url: pdf.doc.output('datauristring'),
       cmd: search.get('cm'),
       id: search.get('tpid'),
-      title: document.title
+      title: document.title,
+      sender
     });
   }).catch(e => console.warn(e));
 });

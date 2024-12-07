@@ -1,4 +1,4 @@
-/* globals config */
+/* global config */
 'use strict';
 
 document.querySelector('select').addEventListener('change', () => {
@@ -50,7 +50,7 @@ document.getElementById('save').addEventListener('click', save);
 document.getElementById('reset').addEventListener('click', e => {
   if (e.detail === 1) {
     const status = document.getElementById('status');
-    window.setTimeout(() => status.textContent = '', 750);
+    setTimeout(() => status.textContent = '', 750);
     status.textContent = 'Double-click to reset!';
   }
   else {
