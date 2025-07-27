@@ -8,8 +8,6 @@
   };
 
   const insert = async () => {
-    console.log('inserting');
-
     if (insert.busy) {
       return;
     }
