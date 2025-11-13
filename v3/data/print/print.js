@@ -113,7 +113,15 @@ Node.prototype.isMultiLine = function() {
   if (this.node.nodeType === this.TEXT_NODE) {
     const range = document.createRange();
     range.selectNode(this.node);
-    return range.getClientRects().length > 1;
+    // check if a node is multi line by counting rect.y of each client rect if the rect has width
+    const ys = new Set();
+    for (const {width, y} of range.getClientRects()) {
+      if (width) {
+        ys.add(y);
+      }
+    }
+
+    return ys.size > 1;
   }
   else {
     return false;
@@ -466,6 +474,8 @@ const start = () => storage({
   // load fonts;
   await pdf.loadFonts();
   //
+  document.body.normalize();
+
   const {nodes, lines, images} = pdf.collect();
   nodes().then(async nodes => {
     for (const node of nodes) {

@@ -2,7 +2,7 @@
   "name": "Convert Gmail™ to PDF (locally)",
   "description": "__MSG_description__",
   "default_locale": "en",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "manifest_version": 3,
   "permissions": [
     "storage",
@@ -47,7 +47,8 @@
   }],
   "homepage_url": "https://webextension.org/listing/to-pdf.html",
   "options_ui": {
-    "page": "/data/options/index.html"
+    "page": "/data/options/index.html",
+    "open_in_tab": true
   },
   "icons": {
      "16": "/data/icons/16.png",
